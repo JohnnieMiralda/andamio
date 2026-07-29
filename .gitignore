@@ -1,0 +1,11 @@
+# Configuración local de Claude Code — no se distribuye con el plugin
+.claude/settings.local.json
+
+# Artefactos que el harness genera al usarlo dentro de este repo
+docs/tasks/
+docs/audit/
+
+# SO
+Thumbs.db
+desktop.ini
+.DS_Store
