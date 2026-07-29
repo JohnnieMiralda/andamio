@@ -8,7 +8,7 @@ Es el **origen**. Los proyectos no tienen copias — consumen el plugin instalad
 
 ```
 .claude-plugin/marketplace.json          catálogo del marketplace
-plugins/ai-harness/
+plugins/andamio/
 ├── .claude-plugin/plugin.json           manifiesto (name, version, author)
 ├── skills/grilling/SKILL.md             entrevista de diseño (no escribe archivos)
 ├── commands/spec.md                     entrevista → docs/specs/<slug>-spec.md
@@ -50,7 +50,7 @@ Apunta el marketplace a la ruta local, no al repo remoto:
 
 ```
 /plugin marketplace add C:/Users/johnn/Documents/ExpeGit/skills
-/plugin install ai-harness@experenta
+/plugin install andamio@miralda
 /reload-plugins
 ```
 

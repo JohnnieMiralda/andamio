@@ -1,13 +1,14 @@
 {
-  "name": "experenta",
+  "name": "miralda",
   "owner": {
     "name": "Johnnie Miralda",
-    "email": "johnnie.miralda@experenta.com"
+    "email": "johnnie.miralda@experenta.com",
+    "url": "https://github.com/JohnnieMiralda"
   },
   "plugins": [
     {
-      "name": "ai-harness",
-      "source": "./plugins/ai-harness",
+      "name": "andamio",
+      "source": "./plugins/andamio",
       "description": "Pipeline spec-driven: grilling → /spec → /plan → /build, más /audit. Un artefacto md por paso, trazabilidad hasta el commit."
     }
   ]

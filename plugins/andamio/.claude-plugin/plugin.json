@@ -1,0 +1,15 @@
+{
+  "name": "andamio",
+  "displayName": "Andamio",
+  "version": "1.0.0",
+  "description": "Pipeline spec-driven para Claude Code: entrevista de diseño, spec, plan de tareas, auditoría y ejecución orquestada, con trazabilidad de punta a punta hasta el commit.",
+  "author": {
+    "name": "Johnnie Miralda",
+    "email": "johnnie.miralda@experenta.com",
+    "url": "https://github.com/JohnnieMiralda"
+  },
+  "homepage": "https://github.com/JohnnieMiralda/andamio",
+  "repository": "https://github.com/JohnnieMiralda/andamio",
+  "license": "MIT",
+  "keywords": ["spec-driven", "planning", "audit", "orchestration", "tasks", "traceability"]
+}

@@ -1,6 +1,6 @@
-# AI Harness — Spec-Driven Work List
+# Andamio — pipeline spec-driven
 
-Pipeline donde cada herramienta deja un artefacto md que la siguiente consume. Cada paso hace **una** cosa: entrevistar, documentar, planificar, auditar. Ninguno hace dos.
+Pipeline donde cada herramienta deja un artefacto md que la siguiente consume. Cada paso hace **una** cosa: entrevistar, documentar, planificar, auditar, ejecutar. Ninguno hace dos.
 
 ## Flujo
 
@@ -79,8 +79,8 @@ Las reglas de layout, formato, regeneración, agente y modelo viven en un solo l
 Se instala como plugin, una vez, y queda en todos tus proyectos:
 
 ```
-/plugin marketplace add JohnnieMiralda/claude-harness
-/plugin install ai-harness@experenta
+/plugin marketplace add JohnnieMiralda/andamio
+/plugin install andamio@miralda
 ```
 
 Scope **personal** en el diálogo de instalación. No se copia nada al `.claude/` de ningún proyecto.
@@ -101,7 +101,7 @@ Los comandos leen `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` — la copia q
 
 ```bash
 # 1. Feature nueva: entrevista de diseño
-/ai-harness:grilling sistema de reintentos para el webhook de Gupshup
+/andamio:grilling sistema de reintentos para el webhook de Gupshup
 # ... respondes preguntas una a una ...
 # > "listo, cerramos"
 
