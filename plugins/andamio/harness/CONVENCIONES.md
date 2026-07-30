@@ -10,6 +10,7 @@ docs/
 ├── audit/   AUDIT-<YYYY-MM-DD>.md       ← /audit   (fuente)
 └── tasks/   <slug>-tasks.md             ← /plan    (derivado)
           audit-<YYYY-MM-DD>-tasks.md  ← /audit   (derivado)
+          <slug>-run-<YYYY-MM-DD>.md   ← /build   (derivado)
 ```
 
 Dos fuentes, un destino. **El nombre del task file espeja el de su fuente**, así el par se encuentra sin abrir nada.
@@ -77,6 +78,29 @@ Ver "todo lo pendiente" del repo no necesita archivo índice:
 ```bash
 grep -rn "^- \[ \]" docs/tasks/
 ```
+
+## Bitácora de corrida
+
+`/build` appendea una línea por tarea ejecutada a `docs/tasks/<slug>-run-<YYYY-MM-DD>.md` — si `/build` muere a mitad de phase, esto es lo que permite reanudar sin re-derivar el estado desde `git diff`. Créala en la primera tarea de la corrida:
+
+```markdown
+# Run: <slug> — <YYYY-MM-DD>
+
+| Tarea | Agente | Modelo | Archivos | Tests | Veredicto |
+|---|---|---|---|---|---|
+```
+
+Una fila por tarea ejecutada — **sea cual sea su resultado**, no solo las que quedaron en `[x]`: una tarea que falló o que salteaste es justo lo que hay que poder leer después. En este orden: tarea (número + título corto), agente, modelo, archivos tocados, estado de tests, veredicto.
+
+`Modelo` es el modelo con el que se ejecutó; si la tarea escaló tras fallar, la escalada va visible en esa misma fila única (`sonnet→opus (escaló, 2 fallos)`), nunca en una fila extra — así la próxima regeneración de `/plan` ve qué asignaciones no alcanzaron. `Veredicto` toma uno de tres valores: `verificado`, `falló — <por qué o dónde seguir>`, `salteada — <por qué>`. Ejemplo:
+
+```markdown
+| 2.1 Validar input del webhook | subagente autónomo | haiku | `src/webhook/validate.ts` | ok (8/8) | verificado |
+| 2.2 Firmar el payload de salida | subagente autónomo | sonnet→opus (escaló, 2 fallos) | `src/webhook/sign.ts` | ok (5/5) | verificado |
+| 3. Migrar tabla de reintentos | agente principal supervisado | opus | — | falla (2/7) | falló — ver advisor |
+```
+
+Techo conocido: la fila se appendea al **terminar** la tarea, así que una corrida que muere a mitad de una tarea individual no deja rastro de esa tarea. Asumido, no resuelto.
 
 ## Asignación de `_Agente:_`
 

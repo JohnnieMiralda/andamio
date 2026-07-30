@@ -27,7 +27,7 @@ docs/tasks/<slug>-tasks.md        ← lista ejecutable, un archivo por spec
       └──► docs/tasks/audit-<fecha>-tasks.md    ← lista ejecutable, una por corrida
 
 
-/andamio:build docs/tasks/<archivo>-tasks.md ["Phase 4"]   ← ejecuta el trabajo
+/andamio:build docs/tasks/<archivo>-tasks.md ["Phase 4" | todas]   ← ejecuta el trabajo
       │
       ▼
    código
@@ -38,7 +38,7 @@ docs/tasks/<slug>-tasks.md        ← lista ejecutable, un archivo por spec
 `/build` es el único comando que escribe código. Corre en **sonnet 5** y actúa como orquestador:
 
 ```
-/andamio:build <task file> ["Phase N"]          ← feature completo, o phase por phase
+/andamio:build <task file> ["Phase N" | todas]  ← por defecto, la siguiente phase con [ ]
       │
       ├─ por cada tarea, según su _Agente:_
       │     subagente autónomo        → delega, con el _Modelo:_ de la tarea
@@ -118,12 +118,15 @@ Los comandos leen `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` — la copia q
 # → docs/audit/AUDIT-2026-07-29.md
 # → docs/tasks/audit-2026-07-29-tasks.md
 
-# 5. Ejecutar — phase por phase (recomendado la primera vez)
-/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md "Phase 1"
-# → orquesta subagentes, corre tests, review opus, marca [x]
-
-# ...o el feature completo de corrido
+# 5. Ejecutar — sin phase corre la siguiente pendiente, una por corrida (por defecto)
 /andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md
+# → orquesta subagentes, corre tests, review opus, marca [x], y te dice qué phase sigue
+
+# ...o una phase puntual
+/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md "Phase 2"
+
+# ...o el feature completo de corrido, en un solo contexto
+/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md todas
 ```
 
 Trabaja en una rama. `/build` verifica `git status` antes de arrancar: si estás en la principal se detiene y te avisa; si hay cambios sin commitear te pregunta una vez si son de una phase anterior de este mismo task file.

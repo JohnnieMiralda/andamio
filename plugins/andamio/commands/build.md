@@ -1,6 +1,6 @@
 ---
-description: Ejecuta un task file completo o una phase específica, orquestando subagentes
-argument-hint: [ruta-al-tasks.md] [phase-opcional]
+description: Ejecuta la siguiente phase pendiente de un task file (o una phase puntual, o todas), orquestando subagentes
+argument-hint: [ruta-al-tasks.md] [phase-opcional | todas]
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash, Task, Agent
 model: claude-sonnet-5
 disable-model-invocation: true
@@ -11,9 +11,12 @@ disable-model-invocation: true
 **Alcance:** $ARGUMENTS
 
 Interpretación del argumento:
-- `<archivo>` solo → todas las phases, en orden.
-- `<archivo> "Phase 4"` o `<archivo> 4` → solo esa phase.
+- `<archivo>` solo → **ejecutas la siguiente phase con tareas en `[ ]`**, no el archivo completo. Un contexto por phase evita que las reglas duras de este mismo prompt se sub-ponderen a medida que el contexto crece con cada retorno de subagente, cada diff y cada salida de test.
+- `<archivo> "Phase 4"` o `<archivo> 4` → esa phase puntual, exista o no trabajo pendiente antes.
+- `<archivo> todas` → corre el archivo completo, phase tras phase, en un solo contexto. Requiere el argumento explícito — ya no es el comportamiento por defecto.
 - Sin archivo → usa el más reciente de `docs/tasks/` y **confírmame cuál antes de arrancar**.
+
+**Cómo encuentras "la siguiente phase":** recorre las `### Phase N:` del archivo en orden y toma la primera que tenga al menos una tarea en `- [ ]` (ignora las opcionales `[ ]*` si todo lo demás de esa phase ya está en `[x]`). Si no queda ninguna, dilo — el archivo está completo.
 
 **Tú eres el orquestador.** Corres en sonnet. No levantas otro orquestador — coordinas, delegas, verificas y reportas.
 
@@ -24,7 +27,7 @@ Interpretación del argumento:
    Si el proyecto tiene su propio `.claude/harness/CONVENCIONES.md`, **esa copia gana** — es una sobreescritura deliberada para este repo.
 3. Verifica el estado del repo: `git status`. Si estás en la rama principal, **dímelo y espera** — no trabajo directo sobre main.
    Si hay cambios sin commitear, muéstrame `git status --short` y **pregúntame una vez** si es trabajo de una phase anterior de este mismo task file. No intentes deducir la procedencia solo — preguntar es más barato y más confiable. Si confirmo que sí, sigue; si no, detente.
-4. Lista en el chat qué vas a ejecutar: las tareas de la phase, con su `_Agente:_` y `_Modelo:_`. Si alguna tarea del alcance es `_Agente: decisión humana_`, **pregúntame por ella ahora**, no a mitad de la ejecución.
+4. Lista en el chat qué vas a ejecutar: las tareas de la phase, con su `_Agente:_` y `_Modelo:_`. Si el argumento no especificaba phase, di cuál elegiste (la primera con tareas en `[ ]`) y por qué. Si alguna tarea del alcance es `_Agente: decisión humana_`, **pregúntame por ella ahora**, no a mitad de la ejecución.
 
 ## Paso 1 — Ejecutar, tarea por tarea
 
@@ -43,7 +46,11 @@ Delegación a subagentes:
 - Tareas independientes de la misma phase pueden ir en paralelo. **Si dos tareas tocan el mismo archivo, van en serie** — dos agentes editando el mismo archivo se pisan.
 - El subagente devuelve: qué cambió (archivo:línea), qué verificó, y qué no pudo hacer. No devuelve el código completo.
 
+Si una tarea falla 2 veces en el modelo de su `_Modelo:_` asignado, reintenta un escalón arriba (`haiku`→`sonnet`, `sonnet`→`opus`; `opus` no escala, ya es el techo — tabla completa en `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md`) **antes** de invocar al advisor del Paso 2. Si la tarea escalada tiene éxito, la escalada queda anotada en la **única** fila de esa tarea en la bitácora de corrida — con el modelo final y la escalada visible ahí, no en una fila extra (formato en `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md`).
+
 Marca `[x]` en el task file **solo** cuando la tarea está hecha y verificada. Tareas con `*` (opcionales) las ejecutas si el resto de la phase quedó verde; si las saltas, dilo.
+
+Después de cada tarea, sea cual sea su resultado — verificada, fallida (tras agotar la escalada de modelo y, si aplica, el advisor del Paso 2) o salteada —, appendea una línea a la bitácora de corrida (`docs/tasks/<slug>-run-<YYYY-MM-DD>.md`, créala si no existe) con el formato definido en `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md`. No dependas de que la tarea haya salido bien: una corrida que muere deja su valor justo en las filas de lo que no funcionó.
 
 Corre los tests del proyecto después de cada tarea que cambie lógica. Si el proyecto no tiene tests, verifica lo mínimo ejecutable (que compile, que el módulo importe, que el endpoint responda).
 
@@ -94,7 +101,8 @@ Al terminar, en el chat:
 4. Si escalaste al advisor: por qué y qué decidió.
 5. Veredicto del review: hallazgos arreglados, y los que quedaron como tareas nuevas.
 6. Qué quedó pendiente y por qué.
-7. **El mensaje de commit** (ver abajo). Lo entregas listo para copiar — no commiteas.
+7. Si no se pasó phase explícita ni `todas`: qué phase sigue con tareas en `[ ]`, para que sepas qué invocar después.
+8. **El mensaje de commit** (ver abajo). Lo entregas listo para copiar — no commiteas.
 
 ## Mensaje de commit
 

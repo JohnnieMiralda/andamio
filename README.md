@@ -44,11 +44,12 @@ Refresca **todas** tus instalaciones — no se copia nada a ningún proyecto. Lo
 
 ## Por qué existe
 
-Claude Code escribe código rápido. El problema no es la velocidad, es que sin estructura terminas con features que nadie especificó, tareas sin origen, y un `git log` que no explica nada. Andamio pone cuatro frenos:
+Claude Code escribe código rápido. El problema no es la velocidad, es que sin estructura terminas con features que nadie especificó, tareas sin origen, y un `git log` que no explica nada. Andamio pone cinco frenos:
 
 - **Ningún paso hace dos cosas.** La entrevista no escribe specs; el spec no planifica; el plan no ejecuta. Cada artefacto es revisable por separado.
 - **Los comandos de generación no pueden tocar tu código.** El main loop tiene `allowed-tools` restringido: lee y escribe markdown, nada más — eso es un permiso real. Los subagentes que `/audit` levanta para explorar son read-only por instrucción de prompt, no por ese permiso; no heredan `allowed-tools`. `/build` es el único main loop que escribe código.
 - **Quien implementa no revisa.** El review y el advisor corren como agentes propios (`plugins/andamio/agents/`), en un modelo distinto al que escribió el código y sin `Write`/`Edit`/`Bash` en su configuración — read-only por permiso, no solo por prompt. Puntos ciegos correlacionados es justo lo que un review debe romper.
+- **Cada corrida de `/build` es una phase, no el archivo entero.** Por defecto ejecuta la siguiente phase con tareas pendientes y te dice cuál sigue — un contexto fresco por phase, no una acumulación de diffs y salidas de test que termina sub-ponderando las reglas duras de su propio prompt. Correr todo de corrido requiere pedirlo explícito (`todas`).
 - **Regenerar no borra progreso.** Si el spec cambia, el plan se actualiza preservando lo que ya marcaste como hecho.
 
 ## Publicar un cambio
