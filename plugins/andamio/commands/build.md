@@ -49,7 +49,7 @@ Corre los tests del proyecto después de cada tarea que cambie lógica. Si el pr
 
 ## Paso 2 — Advisor opus, cuando te trabas
 
-Levanta un subagente **opus** como advisor. Es read-only: aconseja, no implementa. Tú aplicas su recomendación.
+Invoca el subagente **`andamio-advisor`** (`${CLAUDE_PLUGIN_ROOT}/agents/andamio-advisor.md`). Es read-only por configuración de herramientas, no solo por prompt: aconseja, no implementa. Tú aplicas su recomendación.
 
 Escala cuando pase cualquiera de estas — no antes, no "por si acaso":
 
@@ -59,32 +59,21 @@ Escala cuando pase cualquiera de estas — no antes, no "por si acaso":
 - Aparece superficie de seguridad, concurrencia o migración de datos en una tarea que no estaba marcada `opus`.
 - Dos formas de implementar la tarea con trade-offs que no sabes resolver.
 
-Prompt del advisor: el síntoma concreto, lo que ya intentaste y por qué falló, el código relevante (mínimo), y la pregunta específica. **No le pidas "ayúdame con esto"** — pídele que decida entre opciones o que diagnostique un síntoma.
+El agente define qué espera recibir en el prompt y cómo responde — no se lo redactes de nuevo, dale lo que pide: el síntoma concreto, lo que ya intentaste y por qué falló, el código relevante mínimo, y la pregunta específica.
 
 Si el advisor tampoco resuelve, o su recomendación cambia el alcance de la phase: párate y dime. No improvises un rediseño.
 
 ## Paso 3 — Review con agente independiente
 
-Al terminar la phase (o el archivo completo si ejecutaste todo), levanta un subagente de review. **No lo hagas tú** — revisar tu propio trabajo comparte los puntos ciegos.
-
-**Modelo: opus.** Excepción: si toda la phase fue trabajo mecánico de nivel `haiku`, sonnet basta.
-
-El reviewer es **read-only** (Read, Grep, Glob, Bash solo para correr tests). Dale:
+Al terminar la phase (o el archivo completo si ejecutaste todo), invoca el subagente **`andamio-reviewer`** (`${CLAUDE_PLUGIN_ROOT}/agents/andamio-reviewer.md`). **No lo hagas tú** — revisar tu propio trabajo comparte los puntos ciegos. El agente define su propio criterio, orden de verificación y formato de salida — no se lo redactes de nuevo en el prompt, dale lo que pide:
 - El diff de lo que cambió (`git diff`, o la lista de archivos si el diff es enorme).
 - Las tareas de la phase con su trazabilidad.
 - La ruta del spec o reporte fuente.
-
-Que verifique, en este orden:
-1. **¿Los requirements/findings se cumplen de verdad?** No que exista código que los menciona — que el comportamiento pedido ocurra. Este es el punto.
-2. **Regresiones**: qué se rompió que antes funcionaba.
-3. **Calidad**: las 3 dimensiones de `/audit` (legibilidad, malas prácticas, seguridad) limitadas al código nuevo.
-4. **Sobre-ingeniería**: qué se construyó que ninguna tarea pedía.
-
-Devuelve hallazgos con severidad (🔴 🟠 🟡 🟢), `archivo:línea`, y si bloquea o no.
+- La salida de los tests que ya corriste (el agente no tiene Bash, no los corre él).
 
 ### Qué haces con los hallazgos
 
-- 🔴 y 🟠 → **los arreglas ahora**, en esta corrida. Una sola ronda de review después del arreglo, no un ciclo infinito. Si el segundo review sigue en 🔴, párate y dime.
+- 🔴 y 🟠 → **los corrige un subagente opus**, nunca vos ni el mismo modelo que escribió el bug — el invariante "quien implementa no revisa" también aplica a la corrección, no solo a la detección. Una sola ronda de review después del arreglo, no un ciclo infinito. Si el segundo review sigue en 🔴, párate y dime.
 - 🟡 y 🟢 → agrégalos al task file como una phase nueva al final: `### Phase N: Correcciones de review — <YYYY-MM-DD>`, con tareas en `[ ]`, su `_Agente:_` y `_Modelo:_`, y trazabilidad `_Review: <phase revisada>_`. No los arregles ahora: no estaban en el plan.
 
 ## Reglas duras

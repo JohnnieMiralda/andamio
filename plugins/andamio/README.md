@@ -45,10 +45,10 @@ docs/tasks/<slug>-tasks.md        ← lista ejecutable, un archivo por spec
       │     principal supervisado     → la hace él mismo
       │     decisión humana           → se detiene y te pregunta
       │
-      ├─ trabado? → advisor opus (read-only, aconseja pero no implementa)
+      ├─ trabado? → agents/andamio-advisor.md (read-only, aconseja pero no implementa)
       │
-      ├─ al cerrar la phase → reviewer opus (read-only, independiente)
-      │       🔴🟠 → los arregla ahora (una sola ronda)
+      ├─ al cerrar la phase → agents/andamio-reviewer.md (read-only, independiente)
+      │       🔴🟠 → los corrige un subagente opus (una sola ronda de re-review)
       │       🟡🟢 → los agrega como phase nueva al task file
       │
       └─ y te entrega el mensaje de commit listo para copiar
@@ -135,8 +135,8 @@ Trabaja en una rama. `/build` verifica `git status` antes de arrancar: si estás
 - **Los checkboxes solo se marcan al ejecutar**, nunca al generar.
 - **No renumeres requirements en un spec existente** — rompe la trazabilidad del task file. Agrega al final (1.4, 1.5).
 - **Orden de creación: fuente primero, tareas después.** Si falla a mitad, te queda lo caro de reproducir.
-- Los comandos de generación (`/spec`, `/plan`, `/audit`) tienen `allowed-tools` restringido: no pueden modificar tu código, solo leer y escribir los md del harness. `/build` es el único que escribe código.
-- **Quien implementa no revisa.** El review va en un subagente aparte y en un modelo distinto al que escribió el código. Sonnet revisando lo de sonnet comparte los puntos ciegos.
+- Los comandos de generación (`/spec`, `/plan`, `/audit`) tienen `allowed-tools` restringido en su main loop: no puede modificar tu código, solo leer y escribir los md del harness. Eso es un permiso real. Los subagentes que `/audit` levanta para explorar son read-only por instrucción de prompt, no por esa misma restricción — no heredan `allowed-tools`. `/build` es el único main loop que escribe código.
+- **Quien implementa no revisa.** El review y el advisor corren como agentes propios (`agents/andamio-reviewer.md`, `agents/andamio-advisor.md`), en un modelo distinto al que escribió el código y sin `Write`/`Edit`/`Bash` en su configuración de herramientas — read-only por permiso, no solo por prompt. Sonnet revisando lo de sonnet comparte los puntos ciegos.
 - **`/build` no toca la fuente.** Si la implementación revela que el spec está mal, te lo dice y sugiere volver a `grilling` — no lo edita por su cuenta.
 - `grilling` no escribe archivos. Si te pide generar un spec, es un bug de la skill.
 - Si vienes de la versión con `docs/TASKS.md` único: los comandos ya no lo leen ni lo escriben. Muévelo o bórralo tú — migrar a ciegas un archivo con checkboxes marcados no es trabajo de un comando.
