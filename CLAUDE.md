@@ -9,7 +9,7 @@ Es el **origen**. Los proyectos no tienen copias — consumen el plugin instalad
 ```
 .claude-plugin/marketplace.json          catálogo del marketplace
 plugins/andamio/
-├── .claude-plugin/plugin.json           manifiesto (name, version, author)
+├── .claude-plugin/plugin.json           manifiesto (name, author — version se omite mientras se itera)
 ├── skills/grilling/SKILL.md             entrevista de diseño (no escribe archivos)
 ├── commands/spec.md                     entrevista → docs/specs/<slug>-spec.md
 ├── commands/plan.md                     spec → docs/tasks/<slug>-tasks.md
@@ -26,7 +26,7 @@ Flujo, instalación y publicación en [README.md](README.md).
 
 - **Los archivos de apoyo se referencian con `${CLAUDE_PLUGIN_ROOT}`**, no con rutas relativas ni `.claude/`. El placeholder se substituye dentro del contenido de skills y commands. Un plugin instalado vive en un directorio de caché — una ruta relativa al proyecto no lo encuentra.
 - **Nada fuera del directorio del plugin.** Al instalar se copia solo `plugins/<nombre>/`; un `../algo-compartido` no viaja.
-- **Subir `version` en `plugin.json` es lo que dispara la actualización** para quien ya lo tiene instalado. Un cambio sin bump no llega a nadie.
+- **Subir `version` en `plugin.json` es lo que dispara la actualización** para quien ya lo tiene instalado. Un cambio sin bump no llega a nadie. Mientras se itera localmente el campo va omitido — ver "Probar antes de publicar" abajo.
 - `.claude/settings.json` es configuración de **este** repo, no del plugin. No se distribuye.
 
 ## Invariantes al editar
@@ -49,9 +49,8 @@ Frontmatter mínimo: `description`, `argument-hint`, `allowed-tools` (mínimo ne
 Apunta el marketplace a la ruta local, no al repo remoto:
 
 ```
-/plugin marketplace add C:/Users/johnn/Documents/ExpeGit/skills
+/plugin marketplace add C:/Users/johnn/Documents/ExpeGit/andamio
 /plugin install andamio@miralda
-/reload-plugins
 ```
 
-Editar un `SKILL.md` toma efecto de inmediato. Cambios a `commands/`, manifiestos o `harness/` requieren `/reload-plugins`.
+El ciclo real de desarrollo local — por qué el plugin instalado no es un espejo del working tree y cómo forzar el re-sync — vive en el [README.md, sección "Probar sin publicar"](README.md#probar-sin-publicar). No lo dupliques aquí.

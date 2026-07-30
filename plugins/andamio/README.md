@@ -5,29 +5,29 @@ Pipeline donde cada herramienta deja un artefacto md que la siguiente consume. C
 ## Flujo
 
 ```
-grilling <tema>          entrevista, 1 pregunta a la vez. No escribe nada.
+/andamio:grilling <tema>          entrevista, 1 pregunta a la vez. No escribe nada.
       │
       ▼
-/spec                    ← documenta la entrevista
+/andamio:spec                    ← documenta la entrevista
       │
       ▼
 docs/specs/<slug>-spec.md         ← requirements numerados (1.1, 2.3...)
       │
       ▼
-/plan docs/specs/<slug>-spec.md
+/andamio:plan docs/specs/<slug>-spec.md
       │
       ▼
 docs/tasks/<slug>-tasks.md        ← lista ejecutable, un archivo por spec
 
 
-/audit [ruta]
+/andamio:audit [ruta]
       │
       ├──► docs/audit/AUDIT-<fecha>.md          ← hallazgos con IDs (A-01...)
       │
       └──► docs/tasks/audit-<fecha>-tasks.md    ← lista ejecutable, una por corrida
 
 
-/build docs/tasks/<archivo>-tasks.md ["Phase 4"]   ← ejecuta el trabajo
+/andamio:build docs/tasks/<archivo>-tasks.md ["Phase 4"]   ← ejecuta el trabajo
       │
       ▼
    código
@@ -38,7 +38,7 @@ docs/tasks/<slug>-tasks.md        ← lista ejecutable, un archivo por spec
 `/build` es el único comando que escribe código. Corre en **sonnet 5** y actúa como orquestador:
 
 ```
-/build <task file> ["Phase N"]          ← feature completo, o phase por phase
+/andamio:build <task file> ["Phase N"]          ← feature completo, o phase por phase
       │
       ├─ por cada tarea, según su _Agente:_
       │     subagente autónomo        → delega, con el _Modelo:_ de la tarea
@@ -83,7 +83,7 @@ Se instala como plugin, una vez, y queda en todos tus proyectos:
 /plugin install andamio@miralda
 ```
 
-Scope **personal** en el diálogo de instalación. No se copia nada al `.claude/` de ningún proyecto.
+Scope **personal** en el diálogo de instalación: queda en todos tus proyectos, sin copiar nada al `.claude/` de ninguno. Scope **local** es un patrón legítimo mientras pruebas un cambio en un repo puntual — instala solo ahí.
 
 Actualizar, en todos los proyectos a la vez:
 
@@ -106,27 +106,27 @@ Los comandos leen `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` — la copia q
 # > "listo, cerramos"
 
 # 2. Documentar la entrevista
-/spec
+/andamio:spec
 # → docs/specs/reintentos-webhook-gupshup-spec.md
 
 # 3. Convertir el spec en tareas
-/plan docs/specs/reintentos-webhook-gupshup-spec.md
+/andamio:plan docs/specs/reintentos-webhook-gupshup-spec.md
 # → docs/tasks/reintentos-webhook-gupshup-tasks.md
 
 # 4. Auditar código existente (independiente del spec)
-/audit src/handlers
+/andamio:audit src/handlers
 # → docs/audit/AUDIT-2026-07-29.md
 # → docs/tasks/audit-2026-07-29-tasks.md
 
 # 5. Ejecutar — phase por phase (recomendado la primera vez)
-/build docs/tasks/reintentos-webhook-gupshup-tasks.md "Phase 1"
+/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md "Phase 1"
 # → orquesta subagentes, corre tests, review opus, marca [x]
 
 # ...o el feature completo de corrido
-/build docs/tasks/reintentos-webhook-gupshup-tasks.md
+/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md
 ```
 
-Trabaja en una rama. `/build` verifica `git status` antes de arrancar y se detiene si hay cambios sin commitear o si estás en la principal.
+Trabaja en una rama. `/build` verifica `git status` antes de arrancar: si estás en la principal se detiene y te avisa; si hay cambios sin commitear te pregunta una vez si son de una phase anterior de este mismo task file.
 
 ## Reglas del sistema
 

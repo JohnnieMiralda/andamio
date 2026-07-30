@@ -1,6 +1,6 @@
 # Convenciones del harness
 
-Fuente única de verdad para `/plan` y `/audit`. Si cambia una regla, cambia aquí — no en los comandos.
+Fuente única de verdad para `/plan`, `/audit` y `/build`. Si cambia una regla, cambia aquí — no en los comandos.
 
 ## Layout
 

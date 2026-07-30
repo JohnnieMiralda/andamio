@@ -5,16 +5,16 @@
 Andamio, no muleta: no escribe por ti, te sostiene la disciplina.
 
 ```
-grilling <tema>   entrevista de diseño, 1 pregunta a la vez. No escribe nada.
+/andamio:grilling <tema>   entrevista de diseño, 1 pregunta a la vez. No escribe nada.
       ↓
-/spec             → docs/specs/<slug>-spec.md        requirements 1.1, 2.3...
+/andamio:spec            → docs/specs/<slug>-spec.md        requirements 1.1, 2.3...
       ↓
-/plan             → docs/tasks/<slug>-tasks.md       tareas con agente y modelo
+/andamio:plan            → docs/tasks/<slug>-tasks.md       tareas con agente y modelo
       ↓
-/build            → código + review independiente + mensaje de commit
+/andamio:build           → código + review independiente + mensaje de commit
 
-/audit [ruta]     → docs/audit/AUDIT-<fecha>.md      hallazgos A-01, A-02...
-                  → docs/tasks/audit-<fecha>-tasks.md
+/andamio:audit [ruta]    → docs/audit/AUDIT-<fecha>.md      hallazgos A-01, A-02...
+                         → docs/tasks/audit-<fecha>-tasks.md
 ```
 
 Cada tarea sabe **de dónde viene** (`_Requirements: 1.1_` / `_Findings: A-03_`), **quién la ejecuta** (subagente, agente supervisado o tú) y **con qué modelo** (el más barato que la complete de forma confiable). Ese footer llega al commit, así que dentro de seis meses `git log` te dice de qué spec salió cada línea.
@@ -28,7 +28,7 @@ En Claude Code, desde cualquier proyecto:
 /plugin install andamio@miralda
 ```
 
-Elige scope **personal** en el diálogo: queda disponible en todos tus proyectos sin tocar el `.claude/` de ninguno.
+Elige scope **personal** en el diálogo: queda disponible en todos tus proyectos sin tocar el `.claude/` de ninguno. Si solo quieres probarlo en un repo puntual, elige **local** — instala únicamente ahí, sin afectar el resto.
 
 > `/plugin` abre un panel interactivo. Si tu sesión no lo soporta, córrelo desde una terminal con `claude`.
 
@@ -40,7 +40,7 @@ Documentación completa del pipeline: [plugins/andamio/README.md](plugins/andami
 /plugin marketplace update
 ```
 
-Refresca **todas** tus instalaciones — no se copia nada a ningún proyecto. Los plugins solo reciben la actualización cuando sube el `version` de su `plugin.json`: tú decides cuándo hay release, no cada commit.
+Refresca **todas** tus instalaciones — no se copia nada a ningún proyecto. Los plugins solo reciben la actualización cuando sube el `version` de su `plugin.json`: tú decides cuándo hay release, no cada commit. Eso es para un plugin ya publicado — mientras se itera localmente sin `version` pineado es al revés, ver ["Probar sin publicar"](#probar-sin-publicar).
 
 ## Por qué existe
 
@@ -55,7 +55,7 @@ Claude Code escribe código rápido. El problema no es la velocidad, es que sin 
 
 ```bash
 # 1. edita el plugin
-# 2. sube version en plugins/andamio/.claude-plugin/plugin.json
+# 2. re-pinea version en plugins/andamio/.claude-plugin/plugin.json (se omite mientras se itera)
 # 3. commit + push
 git add -A && git commit -m "feat(andamio): <qué cambió>" && git push
 ```
@@ -67,26 +67,35 @@ Semver: `patch` para redacción, `minor` para un comando o regla nueva, `major` 
 ```
 .claude-plugin/marketplace.json      catálogo (lo que lee /plugin marketplace add)
 plugins/andamio/
-├── .claude-plugin/plugin.json       manifiesto: nombre, versión, autor
+├── .claude-plugin/plugin.json       manifiesto: nombre, autor (versión se omite mientras se itera)
 ├── commands/*.md                    slash commands
 ├── skills/grilling/SKILL.md         skills
 └── harness/CONVENCIONES.md          archivos de apoyo, vía ${CLAUDE_PLUGIN_ROOT}
 CLAUDE.md                            contexto para editar este repo
 ```
 
-Los componentes quedan namespaced con el nombre del plugin: la skill `grilling` se invoca `/andamio:grilling`. Eso evita colisiones con skills de otros plugins.
+Los componentes quedan namespaced con el nombre del plugin: los cuatro comandos y la skill se invocan `/andamio:spec`, `/andamio:plan`, `/andamio:audit`, `/andamio:build`, `/andamio:grilling`. Eso evita colisiones con comandos y skills de otros plugins.
 
 ### Probar sin publicar
 
 Apunta el marketplace a la ruta local en vez de al repo:
 
 ```
-/plugin marketplace add C:/Users/johnn/Documents/ExpeGit/skills
+/plugin marketplace add C:/Users/johnn/Documents/ExpeGit/andamio
 /plugin install andamio@miralda
-/reload-plugins
 ```
 
-Editar un `SKILL.md` toma efecto de inmediato. Cambios a `commands/`, manifiestos o `harness/` requieren `/reload-plugins`.
+**El plugin instalado es una copia en caché, no un espejo del working tree.** Editar el repo no cambia lo que corre por sí solo.
+
+Mientras iteras, **omite `version` en `plugin.json`** — sin el campo, Claude Code usa el commit SHA como versión, así que cada commit cuenta como una versión nueva. Con `version` fijo (como debe quedar al publicar), el plugin se pinea a esa versión: subirla sí entrega, pero un re-sync sin subirla no hace nada.
+
+Para llevar un cambio (commiteado o no — no hace falta commitear primero) a la copia instalada:
+
+```bash
+claude plugin update andamio@miralda --scope local
+```
+
+Después, **reinicia la sesión de Claude Code** — el propio comando avisa "Restart to apply changes"; la sesión abierta sigue sirviendo lo que cargó al arrancar.
 
 ## Licencia
 

@@ -28,7 +28,7 @@ Lleva registro mental de tres cosas, porque `/spec` las va a necesitar:
 Cuando ya no queden ramas abiertas, dilo y ofrece cerrar. Si el usuario cierra ("listo", "cerramos", "ya"), resume en el chat las decisiones cerradas y las ramas abiertas, y sugiere el siguiente paso:
 
 ```
-/spec
+/andamio:spec
 ```
 
-Si el usuario pide el spec directamente durante la entrevista ("genera el spec"), no lo escribas tú — dile que corra `/spec` y que estás listo.
+Si el usuario pide el spec directamente durante la entrevista ("genera el spec"), no lo escribas tú — dile que corra `/andamio:spec` y que estás listo.

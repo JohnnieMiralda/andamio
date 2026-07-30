@@ -20,8 +20,10 @@ Interpretación del argumento:
 ## Paso 0 — Antes de tocar código
 
 1. Lee el task file completo y su fuente (el spec o el reporte de auditoría del `> Fuente:`). Sin la fuente no entiendes la trazabilidad de las tareas.
-2. Lee `.claude/harness/CONVENCIONES.md` (o `~/.claude/harness/CONVENCIONES.md`).
-3. Verifica el estado del repo: `git status`. **Si hay cambios sin commitear o estás en la rama principal, dímelo y espera.** No mezclo tu trabajo en curso con el mío.
+2. **Lee las convenciones del harness:** `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md`. Definen el layout, el formato del task file, la asignación de `_Agente:_` y `_Modelo:_`, y el formato de `### Phase N: Correcciones de review`. Es obligatorio.
+   Si el proyecto tiene su propio `.claude/harness/CONVENCIONES.md`, **esa copia gana** — es una sobreescritura deliberada para este repo.
+3. Verifica el estado del repo: `git status`. Si estás en la rama principal, **dímelo y espera** — no trabajo directo sobre main.
+   Si hay cambios sin commitear, muéstrame `git status --short` y **pregúntame una vez** si es trabajo de una phase anterior de este mismo task file. No intentes deducir la procedencia solo — preguntar es más barato y más confiable. Si confirmo que sí, sigue; si no, detente.
 4. Lista en el chat qué vas a ejecutar: las tareas de la phase, con su `_Agente:_` y `_Modelo:_`. Si alguna tarea del alcance es `_Agente: decisión humana_`, **pregúntame por ella ahora**, no a mitad de la ejecución.
 
 ## Paso 1 — Ejecutar, tarea por tarea
