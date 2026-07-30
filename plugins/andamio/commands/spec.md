@@ -1,66 +1,66 @@
 ---
-description: Convierte la entrevista de grilling en un spec en docs/specs/
-argument-hint: [nombre-de-la-feature-opcional]
+description: Turns a grilling interview into a spec under docs/specs/
+argument-hint: [optional-feature-name]
 allowed-tools: Read, Grep, Glob, Write
 model: claude-sonnet-5
 disable-model-invocation: true
 ---
 
-# Spec desde entrevista
+# Spec from interview
 
 **Feature:** $ARGUMENTS
-(Si no se especificó, derívalo de la conversación.)
+(If not specified, derive it from the conversation.)
 
-Escribe el spec de la feature que se acaba de discutir en `docs/specs/<slug>-spec.md` (slug en kebab-case, crea la carpeta si no existe).
+Write the spec for the feature just discussed to `docs/specs/<slug>-spec.md` (slug in kebab-case, create the folder if it doesn't exist).
 
-## Fuente
+## Source
 
-La **conversación actual** es la única fuente. Este comando documenta una entrevista que ya ocurrió — normalmente vía la skill `grilling`.
+The **current conversation** is the only source. This command documents an interview that already happened — typically via the `grilling` skill.
 
-Si en esta conversación no hay una entrevista de diseño de la cual escribir, dilo y detente. Sugiere correr `grilling` primero. No inventes un spec desde cero.
+If there's no design interview in this conversation to write from, say so and stop. Suggest running `grilling` first. Don't invent a spec from scratch.
 
-## Estructura obligatoria
+## Required structure
 
 ```markdown
-# Spec: <Nombre de la feature o producto>
+# Spec: <Feature or product name>
 
-> Generado desde sesión de grilling — <YYYY-MM-DD>
-> Estado: Draft
+> Generated from grilling session — <YYYY-MM-DD>
+> Status: Draft
 
 ## Overview
 
-<Qué es, para quién, y qué problema resuelve. 3-6 líneas.>
+<What it is, for whom, and what problem it solves. 3-6 lines.>
 
-## Decisiones de diseño
+## Design decisions
 
-<Cada decisión tomada en la entrevista con su justificación breve.
-Incluye las alternativas descartadas y por qué.>
+<Each decision made in the interview with brief justification.
+Include discarded alternatives and why.>
 
 ## Requirements
 
-<Requerimientos numerados jerárquicamente. Esta numeración es la fuente de verdad
-que /plan referenciará como _Requirements: N.M_.>
+<Hierarchically numbered requirements. This numbering is the source of truth
+that /plan will reference as _Requirements: N.M_.>
 
-### 1. <Área funcional>
-- 1.1 <Requerimiento atómico y verificable>
-- 1.2 <Requerimiento atómico y verificable>
+### 1. <Functional area>
+- 1.1 <Atomic, verifiable requirement>
+- 1.2 <Atomic, verifiable requirement>
 
-### 2. <Área funcional>
+### 2. <Functional area>
 - 2.1 ...
 
 ## Out of scope
 
-<Lo que explícitamente NO se va a hacer en esta iteración.>
+<What explicitly will NOT be done in this iteration.>
 
 ## Open questions
 
-<Preguntas sin resolver y quién/qué las desbloquea.>
+<Unresolved questions and who/what unblocks them.>
 ```
 
-## Reglas
+## Rules
 
-- Cada requirement es atómico y verificable: se puede marcar hecho o no hecho sin ambigüedad.
-- **NO inventes decisiones que no se discutieron.** Si algo quedó abierto va en Open questions, no en Decisiones de diseño. Un spec con huecos honestos es útil; uno con huecos rellenados a criterio propio es una trampa.
-- Si el spec ya existe, no lo sobreescribas en silencio: muéstrame el diff conceptual (qué requirements cambian, se agregan o se van) y espera confirmación. Renumerar un requirement rompe la trazabilidad del task file — si tienes que agregar, agrega al final (1.4, 1.5) en vez de renumerar.
-- Solo escribes en `docs/specs/`. No toques código ni `docs/tasks/`.
-- Al terminar, confirma la ruta y sugiere: `/plan docs/specs/<slug>-spec.md`
+- Every requirement is atomic and verifiable: it can be marked done or not done with no ambiguity.
+- **Don't invent decisions that weren't discussed.** Anything left open goes in Open questions, not in Design decisions. A spec with honest gaps is useful; one with gaps filled in on your own judgment is a trap.
+- If the spec already exists, don't silently overwrite it: show me the conceptual diff (which requirements change, get added, or go away) and wait for confirmation. Renumbering a requirement breaks the task file's traceability — if you need to add one, add it at the end (1.4, 1.5) instead of renumbering.
+- You only write to `docs/specs/`. Don't touch code or `docs/tasks/`.
+- When done, confirm the path and suggest: `/plan docs/specs/<slug>-spec.md`

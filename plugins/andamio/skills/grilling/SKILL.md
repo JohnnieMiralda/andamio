@@ -11,24 +11,24 @@ Ask the questions one at a time, waiting for feedback on each question before co
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
 
-## Alcance
+## Scope
 
-Esta skill **solo entrevista**. No escribe archivos, no genera specs, no propone tareas. Documentar es trabajo de `/spec`.
+This skill **only interviews**. It writes no files, generates no specs, proposes no tasks. Documenting is `/spec`'s job.
 
-## Durante la entrevista
+## During the interview
 
-Lleva registro mental de tres cosas, porque `/spec` las va a necesitar:
+Keep mental track of three things, because `/spec` is going to need them:
 
-1. **Decisiones cerradas** — qué se decidió y por qué, incluyendo las alternativas descartadas.
-2. **Ramas abiertas** — lo que quedó sin resolver y qué lo desbloquea.
-3. **Fuera de alcance** — lo que el usuario dijo explícitamente que no se hace en esta iteración.
+1. **Closed decisions** — what was decided and why, including the alternatives that were discarded.
+2. **Open branches** — what was left unresolved and what unblocks it.
+3. **Out of scope** — what the user explicitly said won't be done in this iteration.
 
-## Cierre
+## Closing
 
-Cuando ya no queden ramas abiertas, dilo y ofrece cerrar. Si el usuario cierra ("listo", "cerramos", "ya"), resume en el chat las decisiones cerradas y las ramas abiertas, y sugiere el siguiente paso:
+When no open branches are left, say so and offer to close. If the user closes it ("done", "let's wrap up", "that's it"), summarize the closed decisions and the open branches in the chat, and suggest the next step:
 
 ```
 /andamio:spec
 ```
 
-Si el usuario pide el spec directamente durante la entrevista ("genera el spec"), no lo escribas tú — dile que corra `/andamio:spec` y que estás listo.
+If the user asks for the spec directly during the interview ("generate the spec"), don't write it yourself — tell them to run `/andamio:spec` and that you're ready.

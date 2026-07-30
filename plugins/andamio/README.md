@@ -1,145 +1,145 @@
-# Andamio — pipeline spec-driven
+# Andamio — spec-driven pipeline
 
-Pipeline donde cada herramienta deja un artefacto md que la siguiente consume. Cada paso hace **una** cosa: entrevistar, documentar, planificar, auditar, ejecutar. Ninguno hace dos.
+A pipeline where each tool leaves a markdown artifact for the next one to consume. Each step does **one** thing: interview, document, plan, audit, execute. None does two.
 
-## Flujo
+## Flow
 
 ```
-/andamio:grilling <tema>          entrevista, 1 pregunta a la vez. No escribe nada.
+/andamio:grilling <topic>          interview, 1 question at a time. Writes nothing.
       │
       ▼
-/andamio:spec                    ← documenta la entrevista
+/andamio:spec                    ← documents the interview
       │
       ▼
-docs/specs/<slug>-spec.md         ← requirements numerados (1.1, 2.3...)
+docs/specs/<slug>-spec.md         ← numbered requirements (1.1, 2.3...)
       │
       ▼
 /andamio:plan docs/specs/<slug>-spec.md
       │
       ▼
-docs/tasks/<slug>-tasks.md        ← lista ejecutable, un archivo por spec
+docs/tasks/<slug>-tasks.md        ← executable list, one file per spec
 
 
-/andamio:audit [ruta]
+/andamio:audit [path]
       │
-      ├──► docs/audit/AUDIT-<fecha>.md          ← hallazgos con IDs (A-01...)
+      ├──► docs/audit/AUDIT-<date>.md          ← findings with IDs (A-01...)
       │
-      └──► docs/tasks/audit-<fecha>-tasks.md    ← lista ejecutable, una por corrida
+      └──► docs/tasks/audit-<date>-tasks.md    ← executable list, one per run
 
 
-/andamio:build docs/tasks/<archivo>-tasks.md ["Phase 4" | todas]   ← ejecuta el trabajo
+/andamio:build docs/tasks/<file>-tasks.md ["Phase 4" | all]   ← executes the work
       │
       ▼
-   código
+   code
 ```
 
-## Ejecución
+## Execution
 
-`/build` es el único comando que escribe código. Corre en **sonnet 5** y actúa como orquestador:
+`/build` is the only command that writes code. It runs on **sonnet 5** and acts as orchestrator:
 
 ```
-/andamio:build <task file> ["Phase N" | todas]  ← por defecto, la siguiente phase con [ ]
+/andamio:build <task file> ["Phase N" | all]  ← by default, the next phase with [ ]
       │
-      ├─ por cada tarea, según su _Agente:_
-      │     subagente autónomo        → delega, con el _Modelo:_ de la tarea
-      │     principal supervisado     → la hace él mismo
-      │     decisión humana           → se detiene y te pregunta
+      ├─ for each task, per its _Agent:_
+      │     autonomous subagent       → delegates, with the task's _Model:_
+      │     supervised main agent     → does it itself
+      │     human decision            → stops and asks you
       │
-      ├─ trabado? → agents/andamio-advisor.md (read-only, aconseja pero no implementa)
+      ├─ stuck? → agents/andamio-advisor.md (read-only, advises but doesn't implement)
       │
-      ├─ al cerrar la phase → agents/andamio-reviewer.md (read-only, independiente)
-      │       🔴🟠 → los corrige un subagente opus (una sola ronda de re-review)
-      │       🟡🟢 → los agrega como phase nueva al task file
+      ├─ when the phase closes → agents/andamio-reviewer.md (read-only, independent)
+      │       🔴🟠 → an opus subagent fixes them (one single re-review round)
+      │       🟡🟢 → adds them as a new phase to the task file
       │
-      └─ y te entrega el mensaje de commit listo para copiar
+      └─ and delivers the commit message ready to copy
 ```
 
-Un commit por phase, en Conventional Commits (`feat(scope): asunto`), con footer `Refs:` al spec y los requirements que implementa — así la trazabilidad del harness llega al historial de git. `/build` **no commitea**: te da el mensaje y decides tú.
+One commit per phase, in Conventional Commits (`feat(scope): subject`), with a `Refs:` footer to the spec and the requirements it implements — so the harness's traceability reaches the git history. `/build` **doesn't commit**: it gives you the message and you decide.
 
-El advisor no se levanta "por si acaso": escala con gatillos concretos — el mismo error falla tras 2 intentos, el cambio se expande a más módulos de los que decía la tarea, aparece superficie de seguridad o concurrencia donde no estaba marcada, o hay un trade-off que el spec no resolvió.
+The advisor isn't brought in "just in case": it escalates on concrete triggers — the same error fails after 2 attempts, the change expands to more modules than the task described, security or concurrency surface shows up where it wasn't marked, or there's a trade-off the spec didn't resolve.
 
-Dos fuentes (`specs/`, `audit/`), un destino (`tasks/`). El nombre del task file **espeja** el de su fuente, así el par se encuentra sin abrir nada.
+Two sources (`specs/`, `audit/`), one destination (`tasks/`). The task file's name **mirrors** its source's, so the pair is found without opening anything.
 
-Todo lo pendiente del repo, sin archivo índice:
+Everything pending in the repo, with no index file:
 
 ```bash
 grep -rn "^- \[ \]" docs/tasks/
 ```
 
-## Trazabilidad
+## Traceability
 
-Cada tarea apunta a su origen: las de `/plan` a `_Requirements: N.M_` del spec, las de `/audit` a `_Findings: A-NN_` del reporte. Sin origen no hay tarea.
+Every task points to its origin: `/plan`'s point to `_Requirements: N.M_` from the spec, `/audit`'s to `_Findings: A-NN_` from the report. No origin, no task.
 
-Cada tarea indica además **quién** la ejecuta (`_Agente:_`) y **con qué modelo** (`_Modelo:_` — el más barato que la complete de forma confiable).
+Every task also states **who** executes it (`_Agent:_`) and **with which model** (`_Model:_` — the cheapest one that completes it reliably).
 
-Las reglas de layout, formato, regeneración, agente y modelo viven en un solo lugar: **[`harness/CONVENCIONES.md`](harness/CONVENCIONES.md)**. `/plan` y `/audit` lo leen vía `${CLAUDE_PLUGIN_ROOT}`. Si cambia una regla, cambia ahí.
+The rules for layout, format, regeneration, agent, and model live in one single place: **[`harness/CONVENCIONES.md`](harness/CONVENCIONES.md)**. `/plan` and `/audit` read it via `${CLAUDE_PLUGIN_ROOT}`. If a rule changes, it changes there.
 
-## Instalación
+## Installation
 
-Se instala como plugin, una vez, y queda en todos tus proyectos:
+Install it as a plugin, once, and it's there in all your projects:
 
 ```
 /plugin marketplace add JohnnieMiralda/andamio
 /plugin install andamio@miralda
 ```
 
-Scope **personal** en el diálogo de instalación: queda en todos tus proyectos, sin copiar nada al `.claude/` de ninguno. Scope **local** es un patrón legítimo mientras pruebas un cambio en un repo puntual — instala solo ahí.
+**personal** scope in the install dialog: it stays in all your projects, without copying anything to any project's `.claude/`. **local** scope is a legitimate pattern while you're trying out a change in one specific repo — it installs only there.
 
-Actualizar, en todos los proyectos a la vez:
+Update, across all projects at once:
 
 ```
 /plugin marketplace update
 ```
 
-Detalles de publicación y versionado en el [README del marketplace](../../README.md).
+Publishing and versioning details in the [marketplace README](../../README.md).
 
-### Convenciones propias por proyecto
+### Project-specific conventions
 
-Los comandos leen `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` — la copia que viene en el plugin. Si un proyecto necesita reglas distintas (otro layout de `docs/`, otros criterios de modelo), pon un `.claude/harness/CONVENCIONES.md` en ese repo y **esa gana**. Anota arriba del archivo por qué difiere, o en seis meses no vas a saber si es intencional o quedó viejo.
+Commands read `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` — the copy that ships with the plugin. If a project needs different rules (a different `docs/` layout, different model criteria), put a `.claude/harness/CONVENCIONES.md` in that repo and **it wins**. Note at the top of the file why it differs, or in six months you won't know whether it's intentional or just stale.
 
-## Uso típico
+## Typical usage
 
 ```bash
-# 1. Feature nueva: entrevista de diseño
-/andamio:grilling sistema de reintentos para el webhook de Gupshup
-# ... respondes preguntas una a una ...
-# > "listo, cerramos"
+# 1. New feature: design interview
+/andamio:grilling retry system for the Gupshup webhook
+# ... you answer questions one at a time ...
+# > "done, let's close it"
 
-# 2. Documentar la entrevista
+# 2. Document the interview
 /andamio:spec
-# → docs/specs/reintentos-webhook-gupshup-spec.md
+# → docs/specs/gupshup-webhook-retries-spec.md
 
-# 3. Convertir el spec en tareas
-/andamio:plan docs/specs/reintentos-webhook-gupshup-spec.md
-# → docs/tasks/reintentos-webhook-gupshup-tasks.md
+# 3. Turn the spec into tasks
+/andamio:plan docs/specs/gupshup-webhook-retries-spec.md
+# → docs/tasks/gupshup-webhook-retries-tasks.md
 
-# 4. Auditar código existente (independiente del spec)
+# 4. Audit existing code (independent of the spec)
 /andamio:audit src/handlers
 # → docs/audit/AUDIT-2026-07-29.md
 # → docs/tasks/audit-2026-07-29-tasks.md
 
-# 5. Ejecutar — sin phase corre la siguiente pendiente, una por corrida (por defecto)
-/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md
-# → orquesta subagentes, corre tests, review opus, marca [x], y te dice qué phase sigue
+# 5. Execute — with no phase, runs the next pending one, one per run (default)
+/andamio:build docs/tasks/gupshup-webhook-retries-tasks.md
+# → orchestrates subagents, runs tests, opus review, marks [x], and tells you which phase is next
 
-# ...o una phase puntual
-/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md "Phase 2"
+# ...or one specific phase
+/andamio:build docs/tasks/gupshup-webhook-retries-tasks.md "Phase 2"
 
-# ...o el feature completo de corrido, en un solo contexto
-/andamio:build docs/tasks/reintentos-webhook-gupshup-tasks.md todas
+# ...or the whole feature in one go, in a single context
+/andamio:build docs/tasks/gupshup-webhook-retries-tasks.md all
 ```
 
-Trabaja en una rama. `/build` verifica `git status` antes de arrancar: si estás en la principal se detiene y te avisa; si hay cambios sin commitear te pregunta una vez si son de una phase anterior de este mismo task file.
+Work on a branch. `/build` checks `git status` before starting: if you're on main it stops and tells you; if there are uncommitted changes it asks you once whether they're from an earlier phase of this same task file.
 
-## Reglas del sistema
+## System rules
 
-- **Un task file por fuente.** Nunca un archivo compartido entre features: crece sin techo, cuesta tokens en cada ejecución y choca entre ramas.
-- **Regenerar no borra progreso.** Si el spec cambia y corres `/plan` de nuevo, preserva los `[x]` de las tareas que no cambiaron, agrega las nuevas en `[ ]`, y manda a `## Obsoletas` las que ya estaban hechas y dejaron de aplicar. Reporta el delta en el chat.
-- **Los checkboxes solo se marcan al ejecutar**, nunca al generar.
-- **No renumeres requirements en un spec existente** — rompe la trazabilidad del task file. Agrega al final (1.4, 1.5).
-- **Orden de creación: fuente primero, tareas después.** Si falla a mitad, te queda lo caro de reproducir.
-- Los comandos de generación (`/spec`, `/plan`, `/audit`) tienen `allowed-tools` restringido en su main loop: no puede modificar tu código, solo leer y escribir los md del harness. Eso es un permiso real. Los subagentes que `/audit` levanta para explorar son read-only por instrucción de prompt, no por esa misma restricción — no heredan `allowed-tools`. `/build` es el único main loop que escribe código.
-- **Quien implementa no revisa.** El review y el advisor corren como agentes propios (`agents/andamio-reviewer.md`, `agents/andamio-advisor.md`), en un modelo distinto al que escribió el código y sin `Write`/`Edit`/`Bash` en su configuración de herramientas — read-only por permiso, no solo por prompt. Sonnet revisando lo de sonnet comparte los puntos ciegos.
-- **`/build` no toca la fuente.** Si la implementación revela que el spec está mal, te lo dice y sugiere volver a `grilling` — no lo edita por su cuenta.
-- `grilling` no escribe archivos. Si te pide generar un spec, es un bug de la skill.
-- Si vienes de la versión con `docs/TASKS.md` único: los comandos ya no lo leen ni lo escriben. Muévelo o bórralo tú — migrar a ciegas un archivo con checkboxes marcados no es trabajo de un comando.
+- **One task file per source.** Never a file shared between features: it grows without a ceiling, costs tokens on every run, and collides across branches.
+- **Regenerating doesn't erase progress.** If the spec changes and you run `/plan` again, it preserves the `[x]` of tasks that didn't change, adds new ones in `[ ]`, and moves ones that were already done and no longer apply to `## Obsolete`. It reports the delta in chat.
+- **Checkboxes are only marked when executing**, never when generating.
+- **Don't renumber requirements in an existing spec** — it breaks the task file's traceability. Add at the end (1.4, 1.5).
+- **Creation order: source first, tasks after.** If it fails partway through, what's left is the expensive-to-reproduce part.
+- Generation commands (`/spec`, `/plan`, `/audit`) have restricted `allowed-tools` in their main loop: it can't modify your code, only read and write the harness's markdown. That's a real permission. The subagents `/audit` spawns to explore are read-only by prompt instruction, not by that same restriction — they don't inherit `allowed-tools`. `/build` is the only main loop that writes code.
+- **Whoever implements doesn't review.** The review and the advisor run as their own agents (`agents/andamio-reviewer.md`, `agents/andamio-advisor.md`), on a different model than the one that wrote the code, with no `Write`/`Edit`/`Bash` in their tool configuration — read-only by permission, not just by prompt. Sonnet reviewing sonnet's own work shares the same blind spots.
+- **`/build` doesn't touch the source.** If the implementation reveals the spec is wrong, it tells you and suggests going back to `grilling` — it doesn't edit it on its own.
+- `grilling` writes no files. If it asks you to generate a spec, that's a bug in the skill.
+- If you're coming from the version with a single `docs/TASKS.md`: the commands no longer read or write it. Move it or delete it yourself — blindly migrating a file with checked-off checkboxes isn't a command's job.

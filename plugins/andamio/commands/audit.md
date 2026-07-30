@@ -1,73 +1,73 @@
 ---
-description: Auditoría de código - legibilidad, malas prácticas y seguridad
-argument-hint: [ruta-o-glob-opcional]
+description: Code audit - readability, bad practices and security
+argument-hint: [optional-path-or-glob]
 allowed-tools: Read, Grep, Glob, Task, Write, Edit
 model: claude-sonnet-5
 disable-model-invocation: true
 ---
 
-# Auditoría de Código
+# Code Audit
 
-Identifica todo lo que hace el código engorroso, difícil de entender, frágil o inseguro, y produce un plan de acción ejecutable.
+Identifies everything that makes the code cumbersome, hard to understand, fragile, or insecure, and produces an actionable plan.
 
-**Alcance solicitado:** $ARGUMENTS
-(Si no se especificó alcance, audita todo el repositorio.)
+**Requested scope:** $ARGUMENTS
+(If no scope was specified, audit the whole repository.)
 
-**Lee primero las convenciones del harness:** `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md`. Definen el layout, el formato del task file y la asignación de `_Agente:_` y `_Modelo:_`. Es obligatorio.
-Si el proyecto tiene su propio `.claude/harness/CONVENCIONES.md`, **esa copia gana** — es una sobreescritura deliberada para este repo.
+**Read the harness conventions first:** `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md`. They define the layout, the task file format, and the `_Agent:_`/`_Model:_` assignment. Mandatory.
+If the project has its own `.claude/harness/CONVENCIONES.md`, **that copy wins** — it's a deliberate override for that repo.
 
-## Dimensiones
+## Dimensions
 
-1. **Legibilidad y mantenibilidad**: funciones excesivamente largas, nombres ambiguos o inconsistentes, anidación profunda, código duplicado, acoplamiento fuerte, responsabilidades mezcladas, falta de separación de capas, dead code, comentarios desactualizados o ausentes donde son críticos, y complejidad accidental (abstracciones innecesarias, sobre-ingeniería).
+1. **Readability and maintainability**: excessively long functions, ambiguous or inconsistent names, deep nesting, duplicated code, tight coupling, mixed responsibilities, missing layer separation, dead code, stale or missing comments where they're critical, and accidental complexity (unnecessary abstractions, over-engineering).
 
-2. **Malas prácticas**: anti-patrones del stack en uso (revisa primero qué frameworks/lenguajes hay y aplica sus convenciones). Ejemplos: manejo de errores inexistente o catch silencioso, promesas sin await, mutación de estado compartido, magic numbers/strings, configuración hardcodeada, falta de tipado o `any`, lógica de negocio en handlers, ausencia de validación de inputs, dependencias innecesarias o desactualizadas.
+2. **Bad practices**: anti-patterns for the stack in use (check first which frameworks/languages are present and apply their conventions). Examples: missing error handling or silent catch, unawaited promises, shared-state mutation, magic numbers/strings, hardcoded configuration, missing typing or `any`, business logic in handlers, missing input validation, unnecessary or outdated dependencies.
 
-3. **Seguridad**: secretos/credenciales/API keys hardcodeadas o commiteadas, inyección (SQL, command, template), falta de validación de inputs externos (webhooks, query params, payloads), auth/authz débil o ausente en endpoints, exposición de datos sensibles en logs o errores, CORS permisivo, dependencias con CVEs conocidos, manejo inseguro de tokens/sesiones, falta de rate limiting en endpoints públicos.
+3. **Security**: hardcoded or committed secrets/credentials/API keys, injection (SQL, command, template), missing validation of external inputs (webhooks, query params, payloads), weak or missing auth/authz on endpoints, sensitive data exposed in logs or errors, permissive CORS, dependencies with known CVEs, insecure token/session handling, missing rate limiting on public endpoints.
 
-## Estrategia de ejecución
+## Execution strategy
 
-Usa subagentes (Task) para minimizar consumo del contexto principal:
+Use subagents (Task) to minimize main-context consumption:
 
-- **Primero explora tú la estructura** (árbol de directorios, package.json/requirements, configs, entry points) para entender la arquitectura. No lances agentes a ciegas.
-- **Subagentes en paralelo solo para lectura pesada**, divididos por área (handlers/API, lógica de negocio, infra/config/seguridad). Cada uno devuelve resumen compacto: hallazgo, `archivo:línea`, severidad, evidencia mínima — no bloques de código completos.
-- **No uses agentes para pocos archivos o archivos pequeños** — léelos directamente.
-- **Rutas/globs explícitos y sin solapamiento** por agente.
-- Tú consolidas, deduplicas, priorizas y escribes los entregables. Los subagentes NO escriben archivos.
+- **Explore the structure yourself first** (directory tree, package.json/requirements, configs, entry points) to understand the architecture. Don't launch agents blindly.
+- **Parallel subagents only for heavy reading**, split by area (handlers/API, business logic, infra/config/security). Each returns a compact summary: finding, `file:line`, severity, minimal evidence — not full code blocks.
+- **Don't use agents for few or small files** — read them directly.
+- **Explicit, non-overlapping paths/globs** per agent.
+- You consolidate, deduplicate, prioritize, and write the deliverables. Subagents do NOT write files.
 
-## Severidad
+## Severity
 
-- 🔴 **Crítico**: riesgo de seguridad explotable, pérdida de datos, o bug latente grave.
-- 🟠 **Alto**: mala práctica con impacto real en confiabilidad o mantenibilidad.
-- 🟡 **Medio**: deuda técnica que ralentiza el desarrollo.
-- 🟢 **Bajo**: mejora cosmética o de estilo.
+- 🔴 **Critical**: exploitable security risk, data loss, or a severe latent bug.
+- 🟠 **High**: bad practice with real impact on reliability or maintainability.
+- 🟡 **Medium**: technical debt that slows development down.
+- 🟢 **Low**: cosmetic or style improvement.
 
-## Entregables
+## Deliverables
 
-Escríbelos **en este orden**: primero el reporte, después las tareas. El reporte es lo caro de reproducir.
+Write them **in this order**: report first, then tasks. The report is what's expensive to reproduce.
 
-### 1. `docs/audit/AUDIT-<YYYY-MM-DD>.md` — reporte
+### 1. `docs/audit/AUDIT-<YYYY-MM-DD>.md` — report
 
-Crea la carpeta si no existe. Estructura:
+Create the folder if it doesn't exist. Structure:
 
-- **Resumen ejecutivo**: estado general en 3-5 líneas, conteo por severidad.
-- **Contexto del proyecto**: stack detectado, arquitectura observada, tamaño aproximado.
-- **Hallazgos por dimensión**: cada uno con ID (`A-01`, `A-02`, ...), severidad, ubicación exacta (`archivo:línea`), por qué es un problema, y recomendación. Fragmentos de código solo si son indispensables y breves.
-- **Lo que está bien**: brevemente, para no romperlo al refactorizar.
-- **Priorización recomendada**: orden de ataque y justificación.
+- **Executive summary**: overall state in 3-5 lines, count by severity.
+- **Project context**: detected stack, observed architecture, approximate size.
+- **Findings by dimension**: each with an ID (`A-01`, `A-02`, ...), severity, exact location (`file:line`), why it's a problem, and recommendation. Code snippets only if indispensable and brief.
+- **What's working well**: briefly, so it doesn't get broken while refactoring.
+- **Recommended prioritization**: order of attack and justification.
 
-### 2. `docs/tasks/audit-<YYYY-MM-DD>-tasks.md` — tareas
+### 2. `docs/tasks/audit-<YYYY-MM-DD>-tasks.md` — tasks
 
-Un archivo **por corrida** de auditoría; el nombre espeja el del reporte. Formato en `CONVENCIONES.md`, con `# Tasks: Audit <alcance> — <YYYY-MM-DD>` y `> Fuente: docs/audit/AUDIT-<YYYY-MM-DD>.md`.
+One file **per audit run**; its name mirrors the report's. Format in `CONVENCIONES.md`, with `# Tasks: Audit <scope> — <YYYY-MM-DD>` and `> Source: docs/audit/AUDIT-<YYYY-MM-DD>.md`.
 
-Fases por severidad: **Fase 1** = críticos y seguridad, **Fase 2** = malas prácticas de alto impacto, **Fase 3** = legibilidad y deuda técnica.
+Phases by severity: **Phase 1** = critical and security, **Phase 2** = high-impact bad practices, **Phase 3** = readability and technical debt.
 
-Trazabilidad vía `_Findings: A-NN (archivo:línea)_`. Todo hallazgo 🔴 y 🟠 debe tener tarea; los 🟡/🟢 pueden agruparse en tareas de limpieza.
+Traceability via `_Findings: A-NN (file:line)_`. Every 🔴 and 🟠 finding must have a task; 🟡/🟢 ones can be grouped into cleanup tasks.
 
-Si re-auditas un área ya auditada, esto genera un archivo nuevo — no toques ni fusiones los anteriores. Antes de escribir, revisa si en `docs/tasks/` hay tareas pendientes de una auditoría previa del mismo alcance y menciónalo en el chat; consolidar o borrar los viejos es decisión mía.
+If you re-audit an area that was already audited, this generates a new file — don't touch or merge with previous ones. Before writing, check whether `docs/tasks/` has pending tasks from a previous audit of the same scope and mention it in chat; consolidating or deleting the old ones is my call.
 
-## Reglas finales
+## Final rules
 
-- NO modifiques ningún archivo de código. Solo lectura + el reporte + el task file.
-- Sé específico: "`processWebhook` en `src/handlers/gupshup.ts:45` tiene 180 líneas y mezcla validación, parsing y persistencia" es útil; "hay funciones largas" no lo es.
-- Si el repositorio es muy grande, prioriza: entry points, endpoints expuestos, lógica central, configuración/secretos. Indica en el reporte qué quedó fuera del alcance.
-- Al terminar, dame en el chat los 3 hallazgos más críticos y la ruta de ambos entregables.
+- Do NOT modify any code file. Read-only + the report + the task file.
+- Be specific: "`processWebhook` in `src/handlers/gupshup.ts:45` is 180 lines and mixes validation, parsing, and persistence" is useful; "there are long functions" is not.
+- If the repository is very large, prioritize: entry points, exposed endpoints, core logic, configuration/secrets. State in the report what was left out of scope.
+- When done, give me in chat the 3 most critical findings and the path to both deliverables.
