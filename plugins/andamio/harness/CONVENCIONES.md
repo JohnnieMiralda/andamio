@@ -13,7 +13,7 @@ docs/
           <slug>-run-<YYYY-MM-DD>.md   ← /build   (derived)
 ```
 
-Two sources, one destination. **The task file's name mirrors its source's**, so the pair is found without opening anything.
+Two sources, one destination. **The task file's name mirrors its source's**, so the pair is found without opening anything. For `/audit` task runs, this produces a filename with both the audit's date and the run's date — e.g. `audit-2026-07-29-run-2026-07-30.md` — expected, not a typo.
 
 **Creation order:** the source artifact first, then the derived tasks. If the process fails partway through, what's left is the expensive-to-reproduce part. `/audit` writes its report and *then* the task file; `/plan` only reads the spec and writes tasks.
 
@@ -92,7 +92,7 @@ grep -rn "^- \[ \]" docs/tasks/
 
 One row per executed task — **whatever its outcome**, not just the ones that ended up `[x]`: a task that failed or that you skipped is exactly what needs to be readable afterward. In this order: task (number + short title), agent, model, files touched, test status, verdict.
 
-`Model` is the model it actually ran with; if the task escalated after failing, the escalation is visible in that same single row (`sonnet→opus (escalated, 2 failures)`), never in an extra row — so the next `/plan` regeneration sees which assignments fell short. `Verdict` takes one of three values: `verified`, `failed — <why or where to pick up>`, `skipped — <why>`. Example:
+`Model` is the model it actually ran with; if the task escalated after failing, the escalation is visible in that same single row (`sonnet→opus (escalated, 2 failures)`), never in an extra row — so the next `/plan` regeneration sees which assignments fell short. `Verdict` takes one of four values: `verified`, `failed — <why or where to pick up>`, `skipped — <why>`, `already done — <why it wasn't needed>`. Example:
 
 ```markdown
 | 2.1 Validate webhook input | autonomous subagent | haiku | `src/webhook/validate.ts` | ok (8/8) | verified |
@@ -106,9 +106,9 @@ Known ceiling: the row gets appended when the task **finishes**, so a run that d
 
 Three surfaces, different criteria — not "one language for the repo":
 
-- **Documentation** (both READMEs, the marketplace catalog) → English. It decides whether someone installs; a README that whoever's browsing the repo on GitHub can't read hides most of the point.
+- **Documentation** (both READMEs, the marketplace catalog) → English. It decides whether someone installs; a README that whoever's browsing the repo on GitHub can't read loses most of its reach.
 - **Prompts** (`commands/`, `agents/`, this file, `SKILL.md`) → English. Whoever contributes to the harness reads them first — they're the code.
-- **Artifacts the harness produces** (spec, task file, commit message) → the target project's language. If the project's `CLAUDE.md` doesn't specify one, English by default.
+- **Artifacts the harness produces** (spec, task file, run log, commit message) → the target project's language. If the project's `CLAUDE.md` doesn't specify one, English by default.
 
 Output language is parametrized, not forked: every command that writes to `docs/` reads the target project's `CLAUDE.md` — it already does, the internal standard requires it — and writes the artifact in that language. Zero new mechanism.
 
@@ -134,3 +134,9 @@ Practical rules:
 - If a task mixes trivial and complex work, split it into subtasks with different models instead of assigning the expensive model to all of it.
 
 When executing, switch with `/model haiku` (or whichever the task indicates) before working on it — or include it in the subagent's prompt.
+
+## Model escalation
+
+If a task fails twice on the model from its assigned `_Model:_`, retry one tier up (`haiku`→`sonnet`, `sonnet`→`opus`); `opus` doesn't escalate further, it's already the ceiling. The escalated attempt gets the same 2-failure budget before invoking the advisor — not just one shot at the new tier.
+
+If the escalated task succeeds, the escalation is recorded in that task's **single** row in the run log — the final model and the escalation visible there, not in an extra row. See "## Run log" above for the row format (e.g. `sonnet→opus (escalated, 2 failures)`).

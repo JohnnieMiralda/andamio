@@ -16,6 +16,8 @@ plugins/andamio/
 ├── commands/audit.md                    code → docs/audit/AUDIT-<date>.md
 │                                                + docs/tasks/audit-<date>-tasks.md
 ├── commands/build.md                    task file → code (subagents + review)
+├── agents/andamio-reviewer.md           review
+├── agents/andamio-advisor.md            advisor
 └── harness/CONVENCIONES.md              single source: layout, format, agent, model
 .claude/settings.json                    this repo's graphify hooks (not part of the plugin)
 ```
@@ -26,7 +28,7 @@ Flow, installation, and publishing in [README.md](README.md).
 
 - **Support files are referenced with `${CLAUDE_PLUGIN_ROOT}`**, not relative paths or `.claude/`. The placeholder is substituted inside the content of skills and commands. An installed plugin lives in a cache directory — a path relative to the project won't find it.
 - **Nothing outside the plugin's directory.** Installing only copies `plugins/<name>/`; a `../something-shared` doesn't travel.
-- **Bumping `version` in `plugin.json` is what triggers the update** for anyone who already has it installed. A change with no bump reaches no one. While iterating locally the field is left out — see "Testing before publishing" below.
+- **Bumping `version` in `plugin.json` is what triggers the update** for anyone who already has it installed. A change with no bump reaches no one. While iterating locally the field is left out — see "Local plugin testing" below.
 - `.claude/settings.json` is configuration for **this** repo, not for the plugin. It isn't distributed.
 
 ## Invariants when editing
@@ -44,7 +46,7 @@ Flow, installation, and publishing in [README.md](README.md).
 
 Minimum frontmatter: `description`, `argument-hint`, `allowed-tools` (minimum necessary), `model`, `disable-model-invocation: true` — harness commands are invoked by hand, not by the model's own decision. If it writes to `docs/tasks/`, it should read `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` in step 1.
 
-## Testing before publishing
+## Local plugin testing
 
 Point the marketplace at the local path, not the remote repo:
 

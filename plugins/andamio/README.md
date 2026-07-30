@@ -8,16 +8,16 @@ A pipeline where each tool leaves a markdown artifact for the next one to consum
 /andamio:grilling <topic>          interview, 1 question at a time. Writes nothing.
       │
       ▼
-/andamio:spec                    ← documents the interview
+/andamio:spec                      ← documents the interview
       │
       ▼
-docs/specs/<slug>-spec.md         ← numbered requirements (1.1, 2.3...)
+docs/specs/<slug>-spec.md          ← numbered requirements (1.1, 2.3...)
       │
       ▼
 /andamio:plan docs/specs/<slug>-spec.md
       │
       ▼
-docs/tasks/<slug>-tasks.md        ← executable list, one file per spec
+docs/tasks/<slug>-tasks.md         ← executable list, one file per spec
 
 
 /andamio:audit [path]
@@ -56,7 +56,7 @@ docs/tasks/<slug>-tasks.md        ← executable list, one file per spec
 
 One commit per phase, in Conventional Commits (`feat(scope): subject`), with a `Refs:` footer to the spec and the requirements it implements — so the harness's traceability reaches the git history. `/build` **doesn't commit**: it gives you the message and you decide.
 
-The advisor isn't brought in "just in case": it escalates on concrete triggers — the same error fails after 2 attempts, the change expands to more modules than the task described, security or concurrency surface shows up where it wasn't marked, or there's a trade-off the spec didn't resolve.
+The advisor isn't brought in "just in case": the `/build` orchestrator escalates to it on concrete triggers documented in `build.md`'s Step 2.
 
 Two sources (`specs/`, `audit/`), one destination (`tasks/`). The task file's name **mirrors** its source's, so the pair is found without opening anything.
 
@@ -72,7 +72,7 @@ Every task points to its origin: `/plan`'s point to `_Requirements: N.M_` from t
 
 Every task also states **who** executes it (`_Agent:_`) and **with which model** (`_Model:_` — the cheapest one that completes it reliably).
 
-The rules for layout, format, regeneration, agent, and model live in one single place: **[`harness/CONVENCIONES.md`](harness/CONVENCIONES.md)**. `/plan` and `/audit` read it via `${CLAUDE_PLUGIN_ROOT}`. If a rule changes, it changes there.
+The rules for layout, format, regeneration, agent, and model live in one single place: **[`harness/CONVENCIONES.md`](harness/CONVENCIONES.md)**. `/plan`, `/audit`, and `/build` read it via `${CLAUDE_PLUGIN_ROOT}`. If a rule changes, it changes there.
 
 ## Installation
 
@@ -129,7 +129,7 @@ Commands read `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` — the copy that 
 /andamio:build docs/tasks/gupshup-webhook-retries-tasks.md all
 ```
 
-Work on a branch. `/build` checks `git status` before starting: if you're on main it stops and tells you; if there are uncommitted changes it asks you once whether they're from an earlier phase of this same task file.
+Work on a branch. `/build` checks `git status` before starting: if you're on main it stops and tells you. Since each `/build` run does one phase by default, the tree is usually still dirty with the previous phase's uncommitted work when you run the next one — that's the normal steady state, not a special case — so it asks you once whether that's what it is, from this same task file's earlier phase.
 
 ## System rules
 

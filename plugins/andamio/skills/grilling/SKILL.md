@@ -3,7 +3,7 @@ name: grilling
 description: Interview the user relentlessly about a plan or design, one question at a time, until the design tree is resolved. Does NOT write files. Use when the user wants to stress-test a plan before building, or uses any 'grill' trigger phrases.
 ---
 
-# Entrevista
+# Interview
 
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
 
@@ -13,11 +13,11 @@ If a question can be answered by exploring the codebase, explore the codebase in
 
 ## Scope
 
-This skill **only interviews**. It writes no files, generates no specs, proposes no tasks. Documenting is `/spec`'s job.
+This skill **only interviews**. It writes no files, generates no specs, proposes no tasks. Documenting is `/andamio:spec`'s job.
 
 ## During the interview
 
-Keep mental track of three things, because `/spec` is going to need them:
+Keep mental track of three things, because `/andamio:spec` is going to need them:
 
 1. **Closed decisions** — what was decided and why, including the alternatives that were discarded.
 2. **Open branches** — what was left unresolved and what unblocks it.

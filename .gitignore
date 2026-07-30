@@ -2,14 +2,12 @@
 .claude/settings.local.json
 
 # Artefactos que el harness genera al usarlo dentro de este repo.
-# En un proyecto que CONSUME el plugin instalado, docs/tasks/ y docs/audit/
+# En un proyecto que CONSUME el plugin instalado, docs/tasks/* y docs/audit/
 # son el registro trazable del harness y SÍ van commiteados — esta regla
 # es específica de este repo, que es el origen del plugin, no un consumidor.
 docs/tasks/*
 docs/audit/
-# Excepción: este task file documenta por qué cambió el propio harness.
-# (docs/tasks/* en vez de docs/tasks/ — un patrón de directorio con "/"
-# excluye el directorio entero y git no evalúa negaciones adentro)
+# Excepción: este task file y sus run logs documentan por qué cambió el propio harness.
 !docs/tasks/correcciones-harness-*.md
 
 # SO

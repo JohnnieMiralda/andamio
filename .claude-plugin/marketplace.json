@@ -9,7 +9,7 @@
     {
       "name": "andamio",
       "source": "./plugins/andamio",
-      "description": "Spec-driven pipeline: grilling → /spec → /plan → /build, plus /audit. One markdown artifact per step, traceability all the way to the commit."
+      "description": "Spec-driven pipeline: /andamio:grilling → /andamio:spec → /andamio:plan → /andamio:build, plus /andamio:audit. One markdown artifact per step, traceability all the way to the commit."
     }
   ]
 }

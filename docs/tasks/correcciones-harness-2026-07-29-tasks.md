@@ -1,7 +1,7 @@
 # Tasks: Correcciones del harness Andamio — 2026-07-29
 
 > Fuente: `este mismo archivo, sección "Hallazgos de origen"` (review de arquitectura en chat, 2026-07-29)
-> Generado: 2026-07-29 · Actualizado: 2026-07-30 (Phase 1, Phase 2, Phase 3, Phase 4 y Phase 5 ejecutadas y revisadas · Prueba de fuego movida a Phase 7)
+> Generado: 2026-07-29 · Actualizado: 2026-07-30 (Phase 1, Phase 2, Phase 3, Phase 4, Phase 5 y Phase 6 ejecutadas y revisadas · Prueba de fuego movida a Phase 7 · Phase 8 agregada con los hallazgos no bloqueantes del review de Phase 6)
 
 ## Overview
 
@@ -21,8 +21,9 @@ de ruta no era una corrección de ruta, era un cambio de arquitectura. Substituy
 - **Phase 3: Ingeniería de contexto** — la palanca grande · ✅
 - **Phase 4: Consistencia y honestidad** — lo que sostiene el post público · ✅
 - **Phase 5: Internacionalización** — el harness se publica en inglés, en una sola versión · ✅
-- **Phase 6: Correcciones de review** — los 🟡/🟢 que los reviews de las Phases 1-3 dejaron fuera
+- **Phase 6: Correcciones de review** — los 🟡/🟢 que los reviews de las Phases 1-5 dejaron fuera · ✅
 - **Phase 7: Prueba de fuego** — lo único que valida las siete anteriores
+- **Phase 8: Correcciones de review** — los 🟡/🟢 que el review de la Phase 6 dejó fuera
 
 **El orden numérico es el orden de ejecución.** La internacionalización va antes
 de la prueba de fuego a propósito: la Phase 7 tiene que validar la versión en
@@ -256,49 +257,49 @@ tareas completas, la segunda verificando los arreglos 🟠 de esa primera ronda,
 cuando hubo). Los 🔴/🟠 ya se arreglaron en la misma corrida de cada phase —
 ver los commits correspondientes. Esto es lo que quedó fuera por no bloquear.
 
-- [ ]   1. Actualizar referencia stale en `plugins/andamio/README.md:75`
+- [x]   1. Actualizar referencia stale en `plugins/andamio/README.md:75`
     - Dice "`/plan` y `/audit` lo leen vía `${CLAUDE_PLUGIN_ROOT}`" — `/build` también lo lee desde la tarea 1.1 de esta misma Phase 1, y el header de `CONVENCIONES.md:3` ya lo refleja (tarea 1.3). Esta línea quedó un nivel arriba sin corregir
     - _Review: Phase 1 (ronda 1, hallazgo 🟡6)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]   2. Alinear el diagrama de `plugins/andamio/README.md` (líneas 8-20)
+- [x]   2. Alinear el diagrama de `plugins/andamio/README.md` (líneas 8-20)
     - El `←` de la línea 11 queda en la columna 34 contra la 35 de las líneas 14 y 20 — desfase de una columna tras agregar el prefijo `/andamio:` en la tarea 1.5. Cosmético, pero es el primer bloque del README del plugin
     - _Review: Phase 1 (ronda 1, hallazgo 🟡7)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]   3. Prefijo namespaced en `.claude-plugin/marketplace.json:12`
+- [x]   3. Prefijo namespaced en `.claude-plugin/marketplace.json:12`
     - La descripción del plugin en el catálogo dice "grilling → /spec → /plan → /build, más /audit" sin `/andamio:`. Es la tarjeta que ve el panel `/plugin` — primer contacto de quien instala, mismo problema de fondo que R-17 pero en un archivo fuera del alcance literal de la tarea 1.5
     - _Review: Phase 1 (ronda 1, hallazgo 🟢12)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]   4. Colapsar doble verificación de `git status` en `build.md:25-26`
+- [x]   4. Colapsar doble verificación de `git status` en `build.md:25-26`
     - El ítem 3 del Paso 0 corre `git status` y luego pide `git status --short` — dos llamadas donde una basta
     - _Review: Phase 1 (ronda 1, hallazgo 🟢13)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]*  5. Prefijo namespaced en el resto de `grilling/SKILL.md`
+- [x]*  5. Prefijo namespaced en el resto de `grilling/SKILL.md`
     - Quedan dos menciones en prosa de `/spec` sin prefijo (líneas ~16 y ~20): "Documentar es trabajo de `/spec`" y "porque `/spec` las va a necesitar". El segundo reviewer las clasificó 🟡 (no 🟠) porque son referencias a la etapa del pipeline, no instrucciones que el usuario copie literalmente — mismo registro que `CLAUDE.md` y ambos READMEs usan en prosa. Opcional: solo si se quiere el criterio 100% literal de namespacing en todo el repo
     - _Review: Phase 1 (ronda 2, hallazgo 🟡 residual)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]   6. Aclarar la tensión de lectura en `README.md:90` vs `:92`
+- [x]   6. Aclarar la tensión de lectura en `README.md:90` vs `:92`
     - La línea 90 dice que la versión sale del commit SHA (implicando que sin commitear no cambia la versión); la línea 92 dice que `claude plugin update` recoge cambios sin commitear. Ambas son ciertas — son dos mecanismos distintos (identificador de versión vs. contenido copiado) — pero el texto no lo explicita y un lector técnico puede leerlo como contradicción. Una cláusula de media línea en 92 lo cierra
     - _Review: Phase 1 (ronda 2, hallazgo 🟡)_
     - _Agent: supervised main agent_
     - _Model: sonnet_
 
-- [ ]   7. Agregar `agents/*.md` a los diagramas de estructura
+- [x]   7. Agregar `agents/*.md` a los diagramas de estructura
     - `README.md:69-73` y `CLAUDE.md` (sección Estructura) no listan `plugins/andamio/agents/`, que desde la Phase 2 es un componente de primera clase (`andamio-reviewer.md`, `andamio-advisor.md`) y que `README.md:51` ya referencia por ruta. Quien audite ese reclamo va al bloque de estructura y no encuentra el directorio
     - _Review: Phase 2 (ronda 2, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]   8. Consolidar los 5 gatillos de escalada del advisor en una sola fuente
+- [x]   8. Consolidar los 5 gatillos de escalada del advisor en una sola fuente
     - Hoy viven completos en `build.md` Paso 2 (el hogar pactado en la tarea 2.2), se reenumeran completos en `agents/andamio-advisor.md` justo después de decir "no son asunto tuyo", y se resumen de nuevo en `plugins/andamio/README.md`. Riesgo de drift entre las tres copias — invariante 2 de `CLAUDE.md` pide una sola fuente
     - _Review: Phase 2 (ronda 1 y 2, hallazgo 🟡)_
     - _Agent: autonomous subagent_
@@ -311,79 +312,79 @@ ver los commits correspondientes. Esto es lo que quedó fuera por no bloquear.
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  10. Reordenar la prosa del Paso 1 para que siga el orden de ejecución real
+- [x]  10. Reordenar la prosa del Paso 1 para que siga el orden de ejecución real
     - `build.md:49-55` describe la escalada de modelo, el marcado de `[x]` y el append a la bitácora antes del párrafo que corre los tests — pero es la salida de los tests la que produce la señal de fallo de la que dependen la escalada y la verificación. El texto se lee al revés de como se ejecuta
     - _Review: Phase 3 (ronda 1, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  11. Definir el presupuesto de fallos del intento escalado
+- [x]  11. Definir el presupuesto de fallos del intento escalado
     - `build.md:49` no dice si el intento ya escalado de modelo tiene su propio margen de 2 fallos antes de ir al advisor, o si una sola falla ahí ya dispara el Paso 2. Acotado por el techo `opus` (no hay loop infinito), pero queda a criterio de cada corrida en vez de estar definido
     - _Review: Phase 3 (ronda 1, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: sonnet_
 
-- [ ]  12. Resolver la tarea opcional inalcanzable bajo el default de "siguiente phase"
+- [x]  12. Resolver la tarea opcional inalcanzable bajo el default de "siguiente phase"
     - `build.md:19` excluye las tareas `[ ]*` opcionales al buscar "la siguiente phase con tareas en `[ ]`" si el resto de esa phase ya está en `[x]` — pero `build.md:51` dice que las opcionales se ejecutan "si el resto de la phase quedó verde". Con el default de una phase por corrida, una phase cuyo único pendiente es su tarea opcional nunca se selecciona sola: solo se alcanza nombrando la phase explícitamente, lo que contradice la intención de `:51`
     - _Review: Phase 3 (ronda 1, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: sonnet_
 
-- [ ]  13. Corregir la referencia rota a la "tabla completa" de escalada de modelo
+- [x]  13. Corregir la referencia rota a la "tabla completa" de escalada de modelo
     - `build.md:49` remite a `${CLAUDE_PLUGIN_ROOT}/harness/CONVENCIONES.md` como si tuviera una tabla de escalada de modelo. Lo que existe ahí es la tabla de **asignación** de `_Modelo:_` (`CONVENCIONES.md:109-113`), no una escalera `haiku→sonnet→opus` con el umbral de 2 fallos — esa escalera vive solo, inline, en `build.md`. La referencia apunta a algo que no está, y por el invariante de una sola fuente la escalera debería vivir en CONVENCIONES.md, no en build.md
     - _Review: Phase 3 (ronda 1 y 2, hallazgo 🟡 — mismo hallazgo confirmado en ambas rondas)_
     - _Agent: autonomous subagent_
     - _Model: sonnet_
 
-- [ ]  14. Documentar el nombre de archivo de la bitácora para task files de `/audit`
+- [x]  14. Documentar el nombre de archivo de la bitácora para task files de `/audit`
     - `CONVENCIONES.md:13` da `<slug>-run-<YYYY-MM-DD>.md`, que para un task file de `/audit` resuelve a `audit-<fecha>-run-<fecha>.md` (dos fechas en el mismo nombre). Se deriva de "el nombre espeja el de su fuente", pero nunca se dice explícito — vale una línea de ejemplo para que no se lea como error tipográfico
     - _Review: Phase 3 (ronda 1, hallazgo 🟢)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  15. Reencuadrar el árbol sucio entre phases como el camino normal, no la excepción
+- [x]  15. Reencuadrar el árbol sucio entre phases como el camino normal, no la excepción
     - `build.md:29` (Paso 0.3) y `plugins/andamio/README.md:132` siguen redactando "si hay cambios sin commitear, pregúntame una vez" como si fuera un caso especial. Con una phase por corrida como default (Phase 3, tarea 1), encontrar el árbol sucio de la phase anterior es lo que pasa en toda corrida después de la primera — no una excepción
     - _Review: Phase 3 (ronda 1, hallazgo 🟢)_
     - _Agent: autonomous subagent_
     - _Model: sonnet_
 
-- [ ]  16. Resolver la tensión entre el review de `todas` y "un commit por phase"
+- [x]  16. Resolver la tensión entre el review de `todas` y "un commit por phase"
     - `build.md:75` (Paso 3) dice "al terminar la phase (o el archivo completo si ejecutaste todo)" — un solo review al final de una corrida con `todas`. Eso choca con "un commit por phase: la phase es la unidad coherente de trabajo" del Mensaje de commit. Preexistente a esta phase, pero el default nuevo (una phase por corrida) hace que `todas` sea la excepción explícita y vuelve más visible la inconsistencia
     - _Review: Phase 3 (ronda 1, hallazgo 🟢)_
     - _Agent: autonomous subagent_
     - _Model: sonnet_
 
-- [ ]  17. Mapear el caso "tarea ya estaba hecha" a un valor de `Veredicto` de la bitácora
+- [x]  17. Mapear el caso "tarea ya estaba hecha" a un valor de `Veredicto` de la bitácora
     - `build.md:92` ("si una tarea resulta imposible o ya estaba hecha, no la marques, anótalo en el chat y sigue") y el Reporte final no mencionan la bitácora de corrida. El caso "ya estaba hecha" no mapea limpio a ninguno de los tres valores documentados (`verificado` / `falló` / `salteada`) — forzarlo a `salteada` pierde la distinción de por qué se saltó
     - _Review: Phase 3 (ronda 2, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  18. Acotar la negación de `.gitignore` si no se quiere versionar la bitácora
+- [x]  18. Acotar la negación de `.gitignore` si no se quiere versionar la bitácora
     - `!docs/tasks/correcciones-harness-*.md` (tarea 4.2) matchea también `correcciones-harness-2026-07-29-run-<fecha>.md` — el patrón del slug de la bitácora de `CONVENCIONES.md:13` — no solo el task file, que es lo único que el comentario de al lado dice que se versiona. Si versionar la bitácora también es deseable, decirlo explícito en el comentario; si no, acotar a `!docs/tasks/correcciones-harness-*-tasks.md`
     - _Review: Phase 4 (ronda 1, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  19. Quitar la duplicación del comando `grep` entre `README.md` y `CONVENCIONES.md`
+- [x]  19. Quitar la duplicación del comando `grep` entre `README.md` y `CONVENCIONES.md`
     - `README.md:59` (bullet "No hay índice de estado del pipeline") repite el mismo `grep -rn "^- \[ \]" docs/tasks/` que ya vive en `CONVENCIONES.md:79` — contra el invariante 2 ("el README tampoco lo repite"). Referenciar la sección de CONVENCIONES.md en vez de repetir el comando
     - _Review: Phase 4 (ronda 1, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  20. Quitar la oración duplicada en `README.md`
+- [x]  20. Quitar la oración duplicada en `README.md`
     - El bullet "El plugin instalado es una copia en caché..." (`README.md:62`) repite palabra por palabra la misma oración en negrita de `README.md:98`, en el mismo archivo. El bullet ya linkea a esa sección — con el link basta
     - _Review: Phase 4 (ronda 1, hallazgo 🟢)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  21. Recortar el comentario de `.gitignore` a lo que es contexto de este repo
+- [x]  21. Recortar el comentario de `.gitignore` a lo que es contexto de este repo
     - `.gitignore:4-12` tiene 9 líneas de comentario para 3 patrones, con un mini-tutorial de mecánica de git (por qué `docs/tasks/*` en vez de `docs/tasks/`) que no es contexto del repo, es documentación de cómo funciona `.gitignore` en general. Además la línea 5 dice "docs/tasks/" cuando el patrón real ya es `docs/tasks/*` — texto stale desde la propia tarea 4.2
     - _Review: Phase 4 (ronda 1, hallazgo 🟢)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  22. Traducir el heading `# Entrevista` en `skills/grilling/SKILL.md:6`
+- [x]  22. Traducir el heading `# Entrevista` en `skills/grilling/SKILL.md:6`
     - Es el único residuo en español que queda en el archivo tras la corrección de la tarea 5.4 (que tradujo el cuerpo completo, `## Alcance`/`## Durante la entrevista`/`## Cierre`, dejando explícitamente sin tocar las líneas 1-13 por estar fuera del alcance literal del fix). `CONVENCIONES.md:110` clasifica `SKILL.md` como superficie de prompt en inglés — este heading es lo único que falta para que el archivo lo cumpla de verdad
     - _Review: Phase 5 (ronda 2, hallazgo 🟡 residual)_
     - _Agent: autonomous subagent_
@@ -396,13 +397,13 @@ ver los commits correspondientes. Esto es lo que quedó fuera por no bloquear.
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  24. Documentar el idioma de la bitácora de corrida en "Artifact language"
+- [x]  24. Documentar el idioma de la bitácora de corrida en "Artifact language"
     - La sección "## Artifact language" de `CONVENCIONES.md` (agregada en la tarea 5.1) enumera "spec, task file, commit message" como los artefactos que produce el harness, pero omite la bitácora de corrida (`docs/tasks/<slug>-run-<YYYY-MM-DD>.md`), que la misma sección "## Run log" del archivo define como una salida de `/build` con sus propios headers de columna y enum de veredicto. Es exactamente el vacío que dejó a la bitácora de este repo con headers en español bajo una política ya en inglés
     - _Review: Phase 5 (ronda 1, hallazgo 🟡)_
     - _Agent: autonomous subagent_
     - _Model: haiku_
 
-- [ ]  25. Pulir 3 pasajes de la traducción a inglés
+- [x]  25. Pulir 3 pasajes de la traducción a inglés
     - `CONVENCIONES.md:109` traduce "tapa la mayor parte del alcance en GitHub" como "hides most of the point" — pierde el sentido original (alcance/audiencia perdida) por uno más débil
     - `README.md:47` — "Andamio puts in five brakes" es un calco literal de "pone cinco frenos"; un lector nativo espera algo como "puts five brakes in place"
     - `CLAUDE.md` ("Testing before publishing") y `README.md` ("### Testing without publishing") quedaron como dos nombres casi idénticos para dos secciones que se linkean entre sí — fieles a la divergencia original en español ("Probar antes de publicar" / "Probar sin publicar"), pero en inglés la distinción que el español sí transmitía se perdió
@@ -423,6 +424,61 @@ ver los commits correspondientes. Esto es lo que quedó fuera por no bloquear.
     - _Findings: R-03, R-19_
     - _Agent: human decision_
     - _Model: n/a_
+
+### Phase 8: Correcciones de review — 2026-07-30
+
+Hallazgos 🟡/🟢 del review independiente (opus) de la Phase 6. Los 5 🟠 que
+encontró ya se arreglaron en la misma corrida — ver la bitácora
+`docs/tasks/correcciones-harness-2026-07-29-run-2026-07-30.md`. Esto es lo
+que quedó fuera por no bloquear.
+
+- [ ]   1. Re-agregar el recordatorio de apéndice a la bitácora en el Paso 1 de `build.md`
+    - El reorder de la tarea 6.10 (Phase 6) movió la prosa para que seguir el orden real de ejecución (tests → escalada → marcar `[x]`), pero en el camino la oración que instruye appendear la fila a la bitácora de corrida desapareció del Paso 1. Sigue siendo obligatorio vía la lectura de `CONVENCIONES.md` en el Paso 0.2, pero el recordatorio en el punto de ejecución se perdió, y el Reporte final tampoco la menciona
+    - _Review: Phase 6 (ronda 1, hallazgo 🟡)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
+
+- [ ]   2. Resolver el riesgo de que una corrida `todas` ejecute en el mismo run las correcciones que su propio review acaba de crear
+    - La tarea 6.16 hizo que el review corra una vez por phase incluso bajo `todas` — cada phase agrega sus hallazgos 🟡/🟢 como una `### Phase N: Correcciones de review` nueva al final del mismo archivo que el recorrido de `todas` sigue atravesando. Eso significa que una corrida `todas` puede alcanzar y ejecutar tareas que su propio review acaba de crear en esa misma corrida, contra la regla "no los arregles ahora: no estaban en el plan"
+    - _Review: Phase 6 (ronda 1, hallazgo 🟡)_
+    - _Agent: autonomous subagent_
+    - _Model: sonnet_
+
+- [ ]   3. Sincronizar la enumeración de artefactos entre `CLAUDE.md` invariante 8 y `CONVENCIONES.md` "Artifact language"
+    - La tarea 6.24 agregó la bitácora de corrida a la lista de `CONVENCIONES.md` ("spec, task file, run log, commit message"), pero `CLAUDE.md` invariante 8 sigue enumerando solo "spec, task file, commit message" — las dos listas gemelas que definen la misma política de idioma quedaron desincronizadas
+    - _Review: Phase 6 (ronda 1, hallazgo 🟡)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
+
+- [ ]   4. Quitar la duplicación restante del comando `grep` en `plugins/andamio/README.md`
+    - La tarea 6.19 quitó la duplicación del `grep -rn "^- \[ \]" docs/tasks/` en el README raíz, pero `plugins/andamio/README.md` todavía repite el mismo comando literal que ya vive en `CONVENCIONES.md` — el invariante 2 ("el README tampoco lo repite") sigue roto en el otro README
+    - _Review: Phase 6 (ronda 1, hallazgo 🟡)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
+
+- [ ]   5. Corregir 2 tareas ya `[x]` cuyo texto afirma hechos ahora falsos sobre `grilling/SKILL.md`
+    - Distinto del caso de coordenadas de línea stale (tratado como historial aceptable): la tarea 5.2 (Phase 5, `[x]`) afirma que `skills/grilling/SKILL.md` "se queda como está" porque "el cuerpo ya está en inglés" — falso, es la razón por la que existió la tarea 6.22. Y la tarea 6.5 (`[x]`) cita dos frases en español de ese archivo que ya no existen tras la traducción. El review de Phase 6 distinguió esto explícitamente de la tarea 23 (moot): una premisa de hecho incorrecta en un registro `[x]` puede inducir a error a una futura regeneración de `/plan` o auditoría que lo lea, no es solo un número de línea desactualizado
+    - _Review: Phase 6 (ronda 2, hallazgo 🟡)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
+
+- [ ]   6. Aclarar qué "resto de la phase quedó verde" significa para una tarea opcional heredada de una corrida anterior
+    - La tarea 6.12 resolvió que una phase cuyo único pendiente es su tarea opcional se vuelve alcanzable una vez que no queda ninguna otra phase con trabajo no-opcional pendiente. Pero `build.md` (Paso 1, "Run optional (`*`) tasks if the rest of the phase came out green") no tiene una señal verde que evaluar en la corrida actual cuando el resto de esa phase se puso verde en una corrida anterior — la lógica de la 6.12 es sólida, pero la condición que dispara esa oración queda ambigua en ese escenario
+    - _Review: Phase 6 (ronda 1, hallazgo 🟢)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
+
+- [ ]   7. Traducir o documentar explícitamente el idioma de los comentarios de `.gitignore`
+    - Los comentarios de `.gitignore` siguen en español mientras toda la documentación y los prompts pasaron a inglés. Las 3 superficies de "Artifact language" en `CONVENCIONES.md` no cubren comentarios de archivos de configuración del propio repo — es un vacío de la política, no una violación, pero las tareas 6.18 y 6.21 reescribieron esas líneas sin notarlo
+    - _Review: Phase 6 (ronda 1, hallazgo 🟢)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
+
+- [ ]   8. Quitar la última duplicación del resumen de escalada de modelo en `build.md`
+    - La tarea 6.13 movió la escalera completa de escalada de modelo a `harness/CONVENCIONES.md` ("## Model escalation"), pero `build.md` (Paso 1) todavía repite una oración-resumen que restablece la sustancia de la regla en vez de solo referenciar la sección — el invariante 2 apunta exactamente a esto, y es parte de por qué el hallazgo 🟠 de la tensión Paso 1/Paso 2 (bitácora, fila sin número) pudo aparecer
+    - _Review: Phase 6 (ronda 1, hallazgo 🟢)_
+    - _Agent: autonomous subagent_
+    - _Model: haiku_
 
 - [ ]   2. Re-pinear versión y publicar
     - Volver a poner `version` en `plugin.json` (lo quitó la tarea 1.6 para el loop de desarrollo)
