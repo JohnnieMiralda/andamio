@@ -52,6 +52,15 @@ Claude Code escribe código rápido. El problema no es la velocidad, es que sin 
 - **Cada corrida de `/build` es una phase, no el archivo entero.** Por defecto ejecuta la siguiente phase con tareas pendientes y te dice cuál sigue — un contexto fresco por phase, no una acumulación de diffs y salidas de test que termina sub-ponderando las reglas duras de su propio prompt. Correr todo de corrido requiere pedirlo explícito (`todas`).
 - **Regenerar no borra progreso.** Si el spec cambia, el plan se actualiza preservando lo que ya marcaste como hecho.
 
+## Límites conocidos
+
+Nombrarlos hace el harness más creíble, no menos — uno que solo lista virtudes se lee como marketing.
+
+- **No hay índice de estado del pipeline.** `grep -rn "^- \[ \]" docs/tasks/` te da las tareas pendientes, pero no qué specs nunca llegaron a `/plan` ni qué auditorías quedaron sin `/build`. A esta escala un índice es sobre-ingeniería — el gap queda anotado, no resuelto.
+- **Los subagentes ad hoc de `/audit` no heredan `allowed-tools`.** El reviewer y el advisor de `plugins/andamio/agents/` sí son read-only por configuración de herramientas (`tools: Read, Grep, Glob`); los subagentes que `/audit` levanta para explorar código, en cambio, son read-only solo por instrucción de prompt — no heredan la restricción del main loop.
+- **Una corrida interrumpida no se retoma sola.** La bitácora de corrida (`docs/tasks/<slug>-run-<fecha>.md`) deja qué tarea falló o se salteó, pero reanudar sigue siendo una lectura manual — no hay `--resume`, y la tarea en la que la corrida murió a mitad no deja fila (se appendea solo al terminar).
+- **El plugin instalado es una copia en caché, no un espejo del working tree.** Editar el repo no cambia lo que corre hasta un re-sync explícito — ver ["Probar sin publicar"](#probar-sin-publicar).
+
 ## Publicar un cambio
 
 ```bash
