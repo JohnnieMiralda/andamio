@@ -1,102 +1,142 @@
-# Convenciones del harness
+# Harness conventions
 
-Fuente única de verdad para `/plan` y `/audit`. Si cambia una regla, cambia aquí — no en los comandos.
+Single source of truth for `/plan`, `/audit`, and `/build`. If a rule changes, it changes here — not in the commands.
 
 ## Layout
 
 ```
 docs/
-├── specs/   <slug>-spec.md              ← /spec    (fuente)
-├── audit/   AUDIT-<YYYY-MM-DD>.md       ← /audit   (fuente)
-└── tasks/   <slug>-tasks.md             ← /plan    (derivado)
-          audit-<YYYY-MM-DD>-tasks.md  ← /audit   (derivado)
+├── specs/   <slug>-spec.md              ← /spec    (source)
+├── audit/   AUDIT-<YYYY-MM-DD>.md       ← /audit   (source)
+└── tasks/   <slug>-tasks.md             ← /plan    (derived)
+          audit-<YYYY-MM-DD>-tasks.md  ← /audit   (derived)
+          <slug>-run-<YYYY-MM-DD>.md   ← /build   (derived)
 ```
 
-Dos fuentes, un destino. **El nombre del task file espeja el de su fuente**, así el par se encuentra sin abrir nada.
+Two sources, one destination. **The task file's name mirrors its source's**, so the pair is found without opening anything. For `/audit` task runs, this produces a filename with both the audit's date and the run's date — e.g. `audit-2026-07-29-run-2026-07-30.md` — expected, not a typo.
 
-**Orden de creación:** primero el artefacto fuente, después las tareas derivadas. Si el proceso falla a mitad, te queda lo caro de reproducir. `/audit` escribe su reporte y *luego* el task file; `/plan` solo lee el spec y escribe tareas.
+**Creation order:** the source artifact first, then the derived tasks. If the process fails partway through, what's left is the expensive-to-reproduce part. `/audit` writes its report and *then* the task file; `/plan` only reads the spec and writes tasks.
 
-Crea las carpetas si no existen. Un task file por fuente — nunca un archivo compartido entre features.
+Create the folders if they don't exist. One task file per source — never a file shared between features.
 
-## Formato del task file
+## Task file format
 
 ```markdown
-# Tasks: <Nombre> — <YYYY-MM-DD>
+# Tasks: <Name> — <YYYY-MM-DD>
 
-> Fuente: `<ruta al spec o al reporte de auditoría>`
-> Generado: <YYYY-MM-DD> · Actualizado: <YYYY-MM-DD>
+> Source: `<path to the spec or audit report>`
+> Generated: <YYYY-MM-DD> · Updated: <YYYY-MM-DD>
 
 ## Overview
 
-<Descripción breve del plan y las fases. Aquí va la narrativa arquitectónica
-si la hay — no en un documento aparte.>
+<Brief description of the plan and its phases. The architectural narrative
+goes here, if there is one — not in a separate document.>
 
-- **Phase 1: <nombre>** - <descripción>
-- **Phase 2: <nombre>** - <descripción>
+- **Phase 1: <name>** - <description>
+- **Phase 2: <name>** - <description>
 
 ## Tasks
 
-### Phase 1: <nombre>
+### Phase 1: <name>
 
-- [ ]   1. <Título de la tarea>
-    - <Paso concreto 1, mencionando archivos/módulos reales del codebase>
-    - <Paso concreto 2>
+- [ ]   1. <Task title>
+    - <Concrete step 1, mentioning real files/modules from the codebase>
+    - <Concrete step 2>
     - _Requirements: 1.1, 2.3_          ← /plan
-    - _Findings: A-01, A-03 (archivo:línea)_   ← /audit
-    - _Agente: <subagente autónomo | agente principal supervisado | decisión humana>_
-    - _Modelo: <haiku | sonnet | opus>_
+    - _Findings: A-01, A-03 (file:line)_   ← /audit
+    - _Agent: <autonomous subagent | supervised main agent | human decision>_
+    - _Model: <haiku | sonnet | opus>_
 
-- [ ]   2. <Título de la tarea>
-    - [ ] 2.1 <Subtarea>
-        - <Detalle de implementación>
+- [ ]   2. <Task title>
+    - [ ] 2.1 <Subtask>
+        - <Implementation detail>
         - _Requirements: ..._
-        - _Agente: ..._
-        - _Modelo: ..._
-    - [ ]* 2.2 <Subtarea opcional, ej. tests>
-        - **Property N: <propiedad a validar>**
+        - _Agent: ..._
+        - _Model: ..._
+    - [ ]* 2.2 <Optional subtask, e.g. tests>
+        - **Property N: <property to validate>**
         - **Validates: <Requirements N.M | A-NN>**
 ```
 
-Numeración jerárquica para subtareas (2.1, 2.2). Las tareas con `*` son opcionales (típicamente tests de propiedades). Todas nacen en `[ ]` — los checkboxes solo se marcan al **ejecutar**, nunca al generar.
+Hierarchical numbering for subtasks (2.1, 2.2). Tasks with `*` are optional (typically property tests). All are born in `[ ]` — checkboxes are only marked when **executing**, never when generating.
 
-**Trazabilidad**: toda tarea apunta a su origen. `/plan` usa `_Requirements: N.M_` del spec; `/audit` usa `_Findings: A-NN_` del reporte; `/build` usa `_Review: <phase>_` para las correcciones que salen de un review. Sin origen no hay tarea.
+**Traceability**: every task points to its origin. `/plan` uses `_Requirements: N.M_` from the spec; `/audit` uses `_Findings: A-NN_` from the report; `/build` uses `_Review: <phase>_` for corrections coming out of a review. No origin, no task.
 
-## Regeneración: no borres progreso
+## Regeneration: don't erase progress
 
-Si el task file ya existe, **no lo sobreescribas de cero**. La fuente cambió, tu trabajo hecho no:
+If the task file already exists, **don't overwrite it from scratch**. The source changed, your finished work didn't:
 
-1. Lee el archivo existente antes de escribir.
-2. **Preserva el estado `[x]`** de toda tarea cuyo título y trazabilidad no cambiaron.
-3. Las tareas nuevas nacen en `[ ]`.
-4. Una tarea que ya no aplica: si estaba en `[ ]`, desaparece. Si estaba en `[x]`, muévela a una sección `## Obsoletas` al final con una línea de por qué — el registro de trabajo hecho no se borra en silencio.
-5. Actualiza `Actualizado:` en el encabezado.
-6. Reporta en el chat: cuántas tareas se agregaron, cuántas cambiaron, cuántas quedaron obsoletas.
+1. Read the existing file before writing.
+2. **Preserve the `[x]` state** of every task whose title and traceability didn't change.
+3. New tasks are born in `[ ]`.
+4. A task that no longer applies: if it was in `[ ]`, it disappears. If it was in `[x]`, move it to an `## Obsolete` section at the end with a one-line reason — the record of work done doesn't get silently erased.
+5. Update `Updated:` in the header.
+6. Report in chat: how many tasks were added, how many changed, how many became obsolete.
 
-Ver "todo lo pendiente" del repo no necesita archivo índice:
+Seeing "everything pending" in the repo doesn't need an index file:
 
 ```bash
 grep -rn "^- \[ \]" docs/tasks/
 ```
 
-## Asignación de `_Agente:_`
+## Run log
 
-- **subagente autónomo** — mecánico y acotado, criterio de éxito verificable sin discusión.
-- **agente principal supervisado** — arquitectónico, o con riesgo de regresión que hay que ver pasar.
-- **decisión humana** — requiere criterio de negocio, o toca algo que el spec/auditoría no resolvió.
+`/build` appends one line per executed task to `docs/tasks/<slug>-run-<YYYY-MM-DD>.md` — if `/build` dies partway through a phase, this is what lets you resume without re-deriving state from `git diff`. Create it on the run's first task:
 
-## Asignación de `_Modelo:_`
+```markdown
+# Run: <slug> — <YYYY-MM-DD>
 
-Siempre el modelo **más barato** que pueda completar la tarea de forma confiable.
+| Task | Agent | Model | Files | Tests | Verdict |
+|---|---|---|---|---|---|
+```
 
-| Modelo | Cuándo | Ejemplos |
+One row per executed task — **whatever its outcome**, not just the ones that ended up `[x]`: a task that failed or that you skipped is exactly what needs to be readable afterward. In this order: task (number + short title), agent, model, files touched, test status, verdict.
+
+`Model` is the model it actually ran with; if the task escalated after failing, the escalation is visible in that same single row (`sonnet→opus (escalated, 2 failures)`), never in an extra row — so the next `/plan` regeneration sees which assignments fell short. `Verdict` takes one of four values: `verified`, `failed — <why or where to pick up>`, `skipped — <why>`, `already done — <why it wasn't needed>`. Example:
+
+```markdown
+| 2.1 Validate webhook input | autonomous subagent | haiku | `src/webhook/validate.ts` | ok (8/8) | verified |
+| 2.2 Sign the outgoing payload | autonomous subagent | sonnet→opus (escalated, 2 failures) | `src/webhook/sign.ts` | ok (5/5) | verified |
+| 3. Migrate retries table | supervised main agent | opus | — | fails (2/7) | failed — see advisor |
+```
+
+Known ceiling: the row gets appended when the task **finishes**, so a run that dies partway through a single task leaves no trace of that task. Accepted, not solved.
+
+## Artifact language
+
+Three surfaces, different criteria — not "one language for the repo":
+
+- **Documentation** (both READMEs, the marketplace catalog) → English. It decides whether someone installs; a README that whoever's browsing the repo on GitHub can't read loses most of its reach.
+- **Prompts** (`commands/`, `agents/`, this file, `SKILL.md`) → English. Whoever contributes to the harness reads them first — they're the code.
+- **Artifacts the harness produces** (spec, task file, run log, commit message) → the target project's language. If the project's `CLAUDE.md` doesn't specify one, English by default.
+
+Output language is parametrized, not forked: every command that writes to `docs/` reads the target project's `CLAUDE.md` — it already does, the internal standard requires it — and writes the artifact in that language. Zero new mechanism.
+
+## `_Agent:_` assignment
+
+- **autonomous subagent** — mechanical and bounded, success criteria verifiable with no debate.
+- **supervised main agent** — architectural, or with regression risk that needs a human-context reviewer watching it happen.
+- **human decision** — requires business judgment, or touches something the spec/audit left unresolved.
+
+## `_Model:_` assignment
+
+Always the **cheapest** model that can complete the task reliably.
+
+| Model | When | Examples |
 |---|---|---|
-| `haiku` | Mecánico, sin ambigüedad | renombrar, mover archivos, extraer constantes y magic numbers, tipos obvios, formateo, boilerplate desde un patrón existente, actualizar imports, dead code, tests desde template claro |
-| `sonnet` | Implementación estándar | lógica de negocio bien especificada, refactors dentro de un módulo, dividir funciones largas, integración con APIs documentadas, agregar manejo de errores o validación siguiendo un patrón, tests que requieren diseñar casos. **La mayoría.** |
-| `opus` | Costo de error alto | seguridad (auth, inyección, secretos), cambios cross-cutting en varios módulos, migraciones de schema/datos, race conditions y concurrencia, trade-offs de diseño que el spec dejó abiertos |
+| `haiku` | Mechanical, unambiguous | renaming, moving files, extracting constants and magic numbers, obvious types, formatting, boilerplate from an existing pattern, updating imports, dead code, tests from a clear template |
+| `sonnet` | Standard implementation | well-specified business logic, refactors within a module, splitting long functions, integration with documented APIs, adding error handling or validation following a pattern, tests that require designing cases. **Most of the time.** |
+| `opus` | High cost of error | security (auth, injection, secrets), cross-cutting changes across several modules, schema/data migrations, race conditions and concurrency, design trade-offs the spec left open |
 
-Reglas prácticas:
+Practical rules:
 
-- Si dudas entre dos, elige el más barato. Es más fácil escalar una tarea que falló que recuperar tokens quemados.
-- Si una tarea mezcla trabajo trivial y complejo, divídela en subtareas con modelos distintos en vez de asignar el modelo caro a todo.
+- If torn between two, pick the cheaper one. It's easier to escalate a failed task than to recover burned tokens.
+- If a task mixes trivial and complex work, split it into subtasks with different models instead of assigning the expensive model to all of it.
 
-Al ejecutar, cambia con `/model haiku` (o el que indique la tarea) antes de trabajarla — o inclúyelo en el prompt del subagente.
+When executing, switch with `/model haiku` (or whichever the task indicates) before working on it — or include it in the subagent's prompt.
+
+## Model escalation
+
+If a task fails twice on the model from its assigned `_Model:_`, retry one tier up (`haiku`→`sonnet`, `sonnet`→`opus`); `opus` doesn't escalate further, it's already the ceiling. The escalated attempt gets the same 2-failure budget before invoking the advisor — not just one shot at the new tier.
+
+If the escalated task succeeds, the escalation is recorded in that task's **single** row in the run log — the final model and the escalation visible there, not in an extra row. See "## Run log" above for the row format (e.g. `sonnet→opus (escalated, 2 failures)`).

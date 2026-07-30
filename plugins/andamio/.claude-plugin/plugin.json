@@ -1,8 +1,8 @@
 {
   "name": "andamio",
   "displayName": "Andamio",
-  "version": "1.0.0",
-  "description": "Pipeline spec-driven para Claude Code: entrevista de diseño, spec, plan de tareas, auditoría y ejecución orquestada, con trazabilidad de punta a punta hasta el commit.",
+  "version": "0.1.0",
+  "description": "Spec-driven pipeline for Claude Code: design interview, spec, task plan, audit, and orchestrated execution, with end-to-end traceability all the way to the commit.",
   "author": {
     "name": "Johnnie Miralda",
     "email": "johnnie.miralda@experenta.com",

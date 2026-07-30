@@ -1,9 +1,14 @@
 # Configuración local de Claude Code — no se distribuye con el plugin
 .claude/settings.local.json
 
-# Artefactos que el harness genera al usarlo dentro de este repo
-docs/tasks/
+# Artefactos que el harness genera al usarlo dentro de este repo.
+# En un proyecto que CONSUME el plugin instalado, docs/tasks/* y docs/audit/
+# son el registro trazable del harness y SÍ van commiteados — esta regla
+# es específica de este repo, que es el origen del plugin, no un consumidor.
+docs/tasks/*
 docs/audit/
+# Excepción: este task file y sus run logs documentan por qué cambió el propio harness.
+!docs/tasks/correcciones-harness-*.md
 
 # SO
 Thumbs.db
